@@ -37,7 +37,7 @@ function App() {
           {/* 5. Trang vé của tôi: Quản lý vé đã đặt */}
           <Route path="/my-tickets" element={<MyTickets />} />
          
-          {/* 6. Trang thay đổi mật khẩu ab*/}
+          {/* 6. Trang thay đổi mật khẩu abcccccccccccc*/}
           <Route path="/change-password" element={<ChangePassword />} />
           
           <Route path="/admin" element={<AdminDashboard />} />
