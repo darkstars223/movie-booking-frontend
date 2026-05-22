@@ -12,11 +12,11 @@ const SeatSelection = () => {
     const [showtimeInfo, setShowtimeInfo] = useState(null);
 
     useEffect(() => {
-        axios.get(`http://localhost:5000/api/movies/showtime/${showtimeId}`)
+        axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/movies/showtime/${showtimeId}`)
             .then(res => setShowtimeInfo(res.data))
             .catch(err => console.error("Lỗi tải thông tin", err));
 
-        axios.get(`http://localhost:5000/api/movies/seats/${showtimeId}`)
+        axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/movies/seats/${showtimeId}`)
             .then(res => setSeats(res.data))
             .catch(err => console.error("Lỗi tải ghế", err));
     }, [showtimeId]);

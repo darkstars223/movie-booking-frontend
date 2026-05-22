@@ -175,7 +175,7 @@ const MovieCard = ({ movie, onBooking, isUpcoming }) => {
           src={
             imageError
               ? 'https://via.placeholder.com/200x300?text=No+Image'
-              : `http://localhost:5000${movie.poster_url}`
+              : `${import.meta.env.VITE_API_BASE_URL}${movie.poster_url}`
           }
           alt={movie.title}
           style={styles.poster}
