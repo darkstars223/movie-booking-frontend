@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import './SeatSelection.css';
 
 const SeatSelection = () => {
@@ -13,12 +12,12 @@ const SeatSelection = () => {
 
     useEffect(() => {
     // Gọi API lấy thông tin suất chiếu
-    axios.get(`/movies/showtime/${showtimeId}`)
+    api.get(`/movies/showtime/${showtimeId}`)
         .then(res => setShowtimeInfo(res.data))
         .catch(err => console.error("Lỗi tải thông tin", err));
 
     // Gọi API lấy ghế
-    axios.get(`/movies/seats/${showtimeId}`)
+    api.get(`/movies/seats/${showtimeId}`)
         .then(res => {
             // Kiểm tra: Nếu response là array thì set, nếu không thì set mảng rỗng
             if (Array.isArray(res.data)) {
