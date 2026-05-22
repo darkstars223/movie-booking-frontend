@@ -12,14 +12,27 @@ const SeatSelection = () => {
     const [showtimeInfo, setShowtimeInfo] = useState(null);
 
     useEffect(() => {
-        axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/movies/showtime/${showtimeId}`)
-            .then(res => setShowtimeInfo(res.data))
-            .catch(err => console.error("Lỗi tải thông tin", err));
+    // Gọi API lấy thông tin suất chiếu
+    axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/movies/showtime/${showtimeId}`)
+        .then(res => setShowtimeInfo(res.data))
+        .catch(err => console.error("Lỗi tải thông tin", err));
 
-        axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/movies/seats/${showtimeId}`)
-            .then(res => setSeats(res.data))
-            .catch(err => console.error("Lỗi tải ghế", err));
-    }, [showtimeId]);
+    // Gọi API lấy ghế
+    axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/movies/seats/${showtimeId}`)
+        .then(res => {
+            // Kiểm tra: Nếu response là array thì set, nếu không thì set mảng rỗng
+            if (Array.isArray(res.data)) {
+                setSeats(res.data);
+            } else {
+                setSeats([]); 
+                console.warn("Dữ liệu ghế không phải là mảng:", res.data);
+            }
+        })
+        .catch(err => {
+            console.error("Lỗi tải ghế", err);
+            setSeats([]); // Set mảng rỗng khi có lỗi để tránh crash
+        });
+}, [showtimeId]);
 
     const toggleSeat = (seat) => {
         if (seat.is_booked) return;
