@@ -13,12 +13,12 @@ const SeatSelection = () => {
 
     useEffect(() => {
     // Gọi API lấy thông tin suất chiếu
-    axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/movies/showtime/${showtimeId}`)
+    axios.get(`/movies/showtime/${showtimeId}`)
         .then(res => setShowtimeInfo(res.data))
         .catch(err => console.error("Lỗi tải thông tin", err));
 
     // Gọi API lấy ghế
-    axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/movies/seats/${showtimeId}`)
+    axios.get(`/movies/seats/${showtimeId}`)
         .then(res => {
             // Kiểm tra: Nếu response là array thì set, nếu không thì set mảng rỗng
             if (Array.isArray(res.data)) {
