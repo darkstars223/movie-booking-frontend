@@ -1,0 +1,466 @@
+.my-tickets-page {
+  min-height: 100vh;
+  background-color: #f8f9fa; /* Nền xám nhạt đồng bộ trang chủ */
+  padding: 40px 0;
+  color: #333333;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.my-tickets-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.my-tickets-container h1 {
+  font-size: 2rem;
+  margin-bottom: 30px;
+  text-align: left; /* Căn trái giống tiêu đề "Phim chiếu ngày" */
+  color: #1a1a1a;
+  font-weight: 700;
+  border-bottom: 2px solid #1a1a1a;
+  padding-bottom: 10px;
+}
+
+/* Filter Section - Kiểu các ô ngày tháng ở trang chủ */
+.filter-section {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 35px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 10px 24px;
+  border: 1px solid #e0e0e0;
+  background: #ffffff;
+  color: #666666;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.filter-btn:hover {
+  border-color: #e50914;
+  color: #e50914;
+  background: rgba(229, 9, 20, 0.04);
+}
+
+.filter-btn.active {
+  background: #e50914; /* Màu đỏ chủ đạo của logo TTV Cinema */
+  color: white;
+  border-color: #e50914;
+  font-weight: 600;
+}
+
+/* Tickets List */
+.tickets-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 25px;
+}
+
+@media (max-width: 768px) {
+  .tickets-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Ticket Card - Thiết kế bo góc nền trắng giống trang chủ */
+.ticket-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.ticket-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Viền chỉ thị trạng thái nhẹ nhàng, tinh tế */
+.ticket-card[data-status="pending"] {
+  border-left: 4px solid #fbbf24;
+}
+
+.ticket-card[data-status="confirmed"] {
+  border-left: 4px solid #22c55e;
+}
+
+.ticket-card[data-status="cancel"] {
+  opacity: 0.8;
+  border-left: 4px solid #94a3b8;
+  background: #fdfdfd;
+}
+
+.ticket-card[data-status="expire"] {
+  opacity: 0.8;
+  border-left: 4px solid #6b7280;
+  background: #fdfdfd;
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 24px;
+  flex: 1;
+}
+
+.movie-info {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+}
+
+.movie-poster {
+  width: 95px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.movie-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.movie-title {
+  font-size: 1.25rem;
+  margin: 0 0 4px 0;
+  color: #1a1a1a;
+  font-weight: 700;
+}
+
+.movie-details p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #555555;
+}
+
+.movie-details p strong {
+  color: #222222;
+  font-weight: 600;
+}
+
+/* Status Chips gọn gàng */
+.status-chip {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-chip[data-status="pending"] {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.status-chip[data-status="confirmed"] {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.status-chip[data-status="cancel"] {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.status-chip[data-status="expire"] {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* Ticket Actions Bar */
+.ticket-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 16px 24px;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Điều chỉnh lại các nút bấm inline style từ file JS */
+.btn-details {
+  padding: 8px 20px;
+  border: 1px solid #dcdcdc;
+  background: #ffffff;
+  color: #333333;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn-details:hover {
+  background: #f0f0f0;
+  border-color: #cccccc;
+}
+
+.btn-cancel {
+  padding: 8px 20px;
+  border: 1px solid #fecaca !important;
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  border-radius: 6px !important;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-left: 0 !important; /* Reset inline margin */
+}
+
+.btn-cancel:hover {
+  background: #fee2e2 !important;
+  box-shadow: none !important;
+}
+
+/* CSS cho nút Thanh toán viết bằng inline-style trong file JS để đè thuộc tính */
+.ticket-actions button[style*="background-color: rgb(229, 9, 20)"] {
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  padding: 8px 20px !important;
+  margin-left: 0 !important;
+  transition: opacity 0.2s;
+}
+.ticket-actions button[style*="background-color: rgb(229, 9, 20)"]:hover {
+  opacity: 0.9;
+}
+
+/* No Tickets */
+.no-tickets {
+  text-align: center;
+  padding: 80px 20px;
+  color: #888888;
+  grid-column: 1 / -1;
+}
+
+/* Modal Ticket Overlay (Nền tối mờ khi mở chi tiết) */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+/* Chi tiết Vé bên trong Modal */
+.ticket-modal {
+  background: #ffffff;
+  width: 92%;
+  max-width: 650px;
+  border-radius: 16px;
+  position: relative;
+  color: #333333;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.ticket-visual {
+  display: flex;
+  background: #ffffff;
+  border-bottom: 2px dashed #e0e0e0;
+}
+
+@media (max-width: 600px) {
+  .ticket-visual {
+    flex-direction: column;
+  }
+  .ticket-left {
+    border-right: none !important;
+    border-bottom: 2px dashed #e0e0e0;
+  }
+}
+
+.ticket-left {
+  flex: 1.8;
+  padding: 30px;
+  border-right: 2px dashed #e0e0e0;
+  position: relative;
+}
+
+/* Đục lỗ giả lập vé kiểu sáng */
+.ticket-left::after, .ticket-left::before {
+  content: '';
+  position: absolute;
+  right: -11px;
+  width: 22px;
+  height: 22px;
+  background: rgba(0, 0, 0, 0.6); /* Trùng màu nền overlay */
+  border-radius: 50%;
+  z-index: 2;
+}
+.ticket-left::before { top: -11px; }
+.ticket-left::after { bottom: -11px; }
+
+.ticket-left h2 {
+  margin: 0 0 20px 0;
+  color: #1a1a1a;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+}
+
+.info-grid label {
+  font-size: 11px;
+  color: #888888;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-grid p {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 3px 0 0 0;
+  color: #222222;
+}
+
+.ticket-right {
+  flex: 1;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+}
+
+.qr-code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qr-code img {
+  width: 130px;
+  height: 130px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.qr-code p {
+  text-align: center;
+  font-family: monospace;
+  margin-top: 8px;
+  font-weight: 600;
+  color: #555;
+}
+
+.payment-waiting {
+  text-align: center;
+  padding: 10px;
+}
+
+.payment-waiting strong {
+  display: block;
+  color: #d97706;
+  margin-bottom: 6px;
+  font-size: 1rem;
+}
+
+.payment-waiting p {
+  font-size: 12px;
+  color: #666666;
+  margin: 0;
+}
+
+.status-badge {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-badge[data-status="pending"] { background: #fffbeb; color: #d97706; }
+.status-badge[data-status="confirmed"] { background: #f0fdf4; color: #16a34a; }
+.status-badge[data-status="cancel"] { background: #f8fafc; color: #475569; }
+.status-badge[data-status="expire"] { background: #fef2f2; color: #b91c1c; }
+
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: #999999;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 10;
+  transition: color 0.2s;
+}
+
+.close-modal:hover {
+  color: #333333;
+}
+
+.modal-footer {
+  padding: 20px 30px;
+  text-align: left;
+  background: #ffffff;
+}
+
+.modal-footer p {
+  font-size: 12px;
+  color: #777777;
+  margin: 0 0 15px 0;
+}
+
+.btn-cancel-modal {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-cancel-modal:hover {
+  background: #fee2e2;
+}
+
+/* Khắc phục responsive cho bộ lọc mobile */
+@media (max-width: 600px) {
+  .filter-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+  .filter-btn {
+    text-align: center;
+    padding: 8px 10px;
+  }
+}

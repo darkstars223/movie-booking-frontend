@@ -1,0 +1,29 @@
+/* src/pages/Payment.css */
+.payment-page {
+    background-color: #141414;
+    min-height: 80vh;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.payment-content {
+    border: 1px solid #333;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.qr-container img {
+    border: 5px solid white;
+    border-radius: 4px;
+}
+
+.transfer-info p {
+    margin: 8px 0;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+}
+
+.btn-pay-modal:hover {
+    background-color: #f40612 !important;
+    transform: scale(1.02);
+    transition: 0.2s;
+}

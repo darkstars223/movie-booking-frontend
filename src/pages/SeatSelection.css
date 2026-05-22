@@ -1,0 +1,186 @@
+.seat-selection-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding: 40px 20px;
+    color: #333 !important; /* Ép chữ luôn hiện màu tối */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Header */
+.movie-header {
+    width: 100%;
+    max-width: 900px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.movie-title {
+    color: #1a1a1a !important;
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.movie-meta {
+    color: #666 !important;
+    font-size: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    align-items: center;
+}
+
+.meta-dot { width: 5px; height: 5px; background: #ccc; border-radius: 50%; }
+
+/* Screen */
+.screen-container {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+.screen {
+    height: 6px;
+    background: #444; /* Màu tối để nổi bật màn hình */
+    border-radius: 50% / 100% 100% 0 0;
+    box-shadow: 0 15px 25px rgba(0,0,0,0.1);
+}
+
+.screen-label {
+    margin-top: 15px;
+    color: #999 !important;
+    letter-spacing: 5px;
+    font-size: 13px;
+}
+
+/* Legend */
+.legend {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.legend-item { display: flex; align-items: center; gap: 10px; color: #555 !important; font-weight: 500; }
+.legend-dot { width: 22px; height: 22px; border-radius: 4px; }
+.legend-dot.available { background: #fff; border: 2px solid #ddd; }
+.legend-dot.selected { background: #e50914; }
+.legend-dot.booked { background: #e0e0e0; border: 1px dashed #bbb; }
+
+/* Seats Layout */
+.seats-layout-wrapper {
+    background: #fff;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.seat-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.row-name {
+    width: 25px;
+    font-weight: 800;
+    color: #bbb !important;
+    text-align: center;
+}
+
+.row-seats {
+    display: flex;
+    gap: 8px;
+}
+
+.seat-box {
+    width: 38px;
+    height: 38px;
+    background: #fff;
+    border: 2px solid #eee;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #444 !important; /* Chữ số ghế hiện rõ */
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.seat-box:hover:not(.booked) {
+    border-color: #e50914;
+    color: #e50914 !important;
+}
+
+.seat-box.selected {
+    background: #e50914 !important;
+    border-color: #e50914 !important;
+    color: #fff !important;
+}
+
+.seat-box.booked {
+    background: #f0f0f0 !important;
+    color: #ccc !important;
+    border-color: #f0f0f0 !important;
+    cursor: not-allowed;
+}
+
+/* Footer Card */
+.booking-footer-card {
+    margin-top: 50px;
+    width: 100%;
+    max-width: 500px;
+    background: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.summary-info {
+    margin-bottom: 25px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 15px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.summary-item label { color: #888 !important; }
+.summary-item span { font-weight: 700; color: #333 !important; }
+
+.total-price-text {
+    color: #e50914 !important;
+    font-size: 22px;
+}
+
+.btn-booking-confirm {
+    width: 100%;
+    padding: 15px;
+    background: #e50914;
+    color: #fff !important;
+    border: none;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.btn-booking-confirm:disabled {
+    background: #eee;
+    color: #999 !important;
+    cursor: not-allowed;
+}
