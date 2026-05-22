@@ -155,7 +155,7 @@ const Home = () => {
 };
 
 const MovieCard = ({ movie, onBooking, isUpcoming }) => {
-  const [imageError, setImageError] = useState(false);
+   
   const todayTimes = (movie.showtimesToday || [])
     .map((showtime) =>
       new Date(showtime.start_time).toLocaleTimeString('vi-VN', {
@@ -175,7 +175,7 @@ const MovieCard = ({ movie, onBooking, isUpcoming }) => {
           src={movie.poster_url?.startsWith('http') ? movie.poster_url : `${import.meta.env.VITE_API_BASE_URL}${movie.poster_url}`}
           alt={movie.title}
           style={styles.poster}
-          onError={() => setImageError(true)}
+         
         />
       </div>
 
