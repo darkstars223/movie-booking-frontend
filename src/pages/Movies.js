@@ -152,7 +152,7 @@ const MovieRow = ({ movie, showtimes, onSelect }) => {
   return (
     <div style={styles.movieCard}>
       <img
-        src={`http://localhost:5000${movie.poster_url}`}
+        src={movie.poster_url?.startsWith('http') ? movie.poster_url : `http://localhost:5000${movie.poster_url}`}
         alt={movie.title}
         style={styles.poster}
       />

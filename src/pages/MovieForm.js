@@ -14,9 +14,9 @@ const MovieForm = () => {
         duration: '',
         genre: '',
         youtube_trailer_url: '',
-        release_date: ''
+        release_date: '',
+        poster_url: ''
     });
-    const [file, setFile] = useState(null);
 
     useEffect(() => {
         if (id) {
@@ -29,22 +29,23 @@ const MovieForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const formData = new FormData();
-        formData.append('title', movie.title);
-        formData.append('description', movie.description);
-        formData.append('duration', movie.duration);
-        formData.append('genre', movie.genre);
-        formData.append('youtube_trailer_url', movie.youtube_trailer_url);
-        formData.append('trailer_url', movie.youtube_trailer_url);
-        formData.append('release_date', movie.release_date);
-        formData.append('userId', user.id);
-        if (file) formData.append('poster', file);
+        const payload = {
+            title: movie.title,
+            description: movie.description,
+            duration: movie.duration,
+            genre: movie.genre,
+            youtube_trailer_url: movie.youtube_trailer_url,
+            trailer_url: movie.youtube_trailer_url,
+            release_date: movie.release_date,
+            poster_url: movie.poster_url,
+            userId: user.id
+        };
 
         try {
             if (id) {
-                await api.put(`/admin/movies/edit/${id}`, formData);
+                await api.put(`/admin/movies/edit/${id}`, payload);
             } else {
-                await api.post('/admin/movies/add', formData);
+                await api.post('/admin/movies/add', payload);
             }
             alert('Thao tác thành công!');
             navigate('/admin');
@@ -126,8 +127,14 @@ const MovieForm = () => {
                 </label>
 
                 <label style={fieldStyle}>
-                    <span style={labelStyle}>Poster phim</span>
-                    <input type="file" onChange={e => setFile(e.target.files[0])} />
+                    <span style={labelStyle}>URL Poster phim</span>
+                    <input
+                        type="text"
+                        placeholder="https://example.com/poster.jpg"
+                        style={inputStyle}
+                        value={movie.poster_url || ''}
+                        onChange={e => setMovie({ ...movie, poster_url: e.target.value })}
+                    />
                 </label>
 
                 <button type="submit" style={btnSubmit}>

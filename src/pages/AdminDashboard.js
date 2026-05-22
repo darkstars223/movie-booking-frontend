@@ -377,7 +377,7 @@ const AdminDashboard = () => {
                             {movies.map(m => (
                                 <tr key={m.id} style={{ borderBottom: '1px solid #333' }}>
                                     <td>{m.id}</td>
-                                    <td><img src={`http://localhost:5000${m.poster_url}`} width="50" alt="" /></td>
+                                    <td><img src={m.poster_url?.startsWith('http') ? m.poster_url : `http://localhost:5000${m.poster_url}`} width="50" alt="" /></td>
                                     <td>{m.title}</td>
                                     <td>{m.genre}</td>
                                     <td>

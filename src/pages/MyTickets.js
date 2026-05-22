@@ -174,7 +174,7 @@ const MyTickets = () => {
                 <div className="ticket-header">
                   <div className="movie-info">
                     <img
-                      src={ticket.poster_url?.startsWith('http') ? ticket.poster_url : `http://localhost:5000${ticket.poster_url}`}
+                      src={ticket.poster_url?.startsWith('http') ? ticket.poster_url : (ticket.poster_url ? `http://localhost:5000${ticket.poster_url}` : '')}
                       alt={ticket.title}
                       className="movie-poster"
                     />
