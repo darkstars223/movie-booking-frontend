@@ -172,11 +172,7 @@ const MovieCard = ({ movie, onBooking, isUpcoming }) => {
 
       <div style={styles.posterContainer}>
         <img
-          src={
-            imageError
-              ? 'https://via.placeholder.com/200x300?text=No+Image'
-              : `${import.meta.env.VITE_API_BASE_URL}${movie.poster_url}`
-          }
+          src={movie.poster_url?.startsWith('http') ? movie.poster_url : `${import.meta.env.VITE_API_BASE_URL}${movie.poster_url}`}
           alt={movie.title}
           style={styles.poster}
           onError={() => setImageError(true)}
