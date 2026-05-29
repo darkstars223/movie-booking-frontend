@@ -68,6 +68,11 @@ const formatDateTimePreview = (dateTimeValue) => {
     });
 };
 
+const formatCurrency = (value) => {
+    const number = Number(value) || 0;
+    return number.toLocaleString('vi-VN') + ' đ';
+};
+
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('movies');
     const [movies, setMovies] = useState([]);
@@ -367,6 +372,15 @@ const AdminDashboard = () => {
         };
         return labels[status] || status;
     };
+
+    const topShowtimeCharts = (statistics?.revenue_by_showtime || [])
+        .slice()
+        .sort((a, b) => Number(b.revenue) - Number(a.revenue))
+        .slice(0, 6);
+
+    const maxShowtimeRevenue = topShowtimeCharts.length
+        ? Math.max(...topShowtimeCharts.map(item => Number(item.revenue) || 0))
+        : 1;
 
     return (
         <div style={{ padding: '30px', color: 'white' }}>
@@ -853,6 +867,32 @@ const AdminDashboard = () => {
                             </div>
 
                             <section style={{ marginTop: '28px' }}>
+                                <h3>Biểu đồ doanh thu suất chiếu hàng đầu</h3>
+                                <div style={chartSection}>
+                                    {topShowtimeCharts.length === 0 && (
+                                        <div style={{ color: '#aaa' }}>Không có dữ liệu để hiển thị biểu đồ.</div>
+                                    )}
+                                    {topShowtimeCharts.map(item => (
+                                        <div key={item.showtime_id} style={chartRow}>
+                                            <div style={chartLabel}>
+                                                <div>{item.movie_title}</div>
+                                                <div style={chartSmallLabel}>{new Date(item.start_time).toLocaleString('vi-VN')}</div>
+                                            </div>
+                                            <div style={chartBarBackground}>
+                                                <div
+                                                    style={{
+                                                        ...chartBar,
+                                                        width: `${(Number(item.revenue) / maxShowtimeRevenue) * 100}%`
+                                                    }}
+                                                />
+                                            </div>
+                                            <div style={chartValue}>{formatCurrency(item.revenue)}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+
+                            <section style={{ marginTop: '28px' }}>
                                 <h3>Doanh thu theo suất chiếu</h3>
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={tableStyle}>
@@ -959,6 +999,13 @@ const buttonPrimary = { background: '#e50914', color: 'white', border: 'none', b
 const metricCard = { background: '#111', border: '1px solid #333', borderRadius: '12px', padding: '18px', minHeight: '110px' };
 const metricTitle = { color: '#aaa', marginBottom: '12px', fontSize: '14px' };
 const metricValue = { color: 'white', fontSize: '24px', fontWeight: '700' };
+const chartSection = { display: 'grid', gap: '14px', marginTop: '18px' };
+const chartRow = { display: 'grid', gridTemplateColumns: 'minmax(220px, 1.5fr) 2.5fr auto', gap: '12px', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid #2c2c2c' };
+const chartLabel = { display: 'flex', flexDirection: 'column', gap: '4px', color: 'white' };
+const chartSmallLabel = { color: '#777', fontSize: '12px' };
+const chartBarBackground = { background: '#111', border: '1px solid #333', borderRadius: '999px', height: '16px', width: '100%', overflow: 'hidden' };
+const chartBar = { height: '100%', borderRadius: '999px', background: '#e50914' };
+const chartValue = { color: 'white', fontSize: '13px', textAlign: 'right' };
 const tableRow = { borderBottom: '1px solid #333' };
 const tableCell = { padding: '12px 10px' };
 const adminFieldStyle = { display: 'block', marginBottom: '10px' };
