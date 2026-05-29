@@ -7,15 +7,23 @@ import { formatDateOnly } from '../utils/date';
 const parseLocalDateTime = (value) => {
     if (!value) return null;
 
-    const normalized = String(value).trim().replace('T', ' ').replace(/\//g, '-');
-    const [datePart, timePart = '00:00:00'] = normalized.split(' ');
-    const [year, month, day] = (datePart || '').split('-').map(Number);
-    if ([year, month, day].some(isNaN)) return null;
+    const str = String(value).trim();
+    
+    // Xử lý định dạng MySQL: YYYY-MM-DD HH:mm:ss
+    // hoặc ISO: YYYY-MM-DDTHH:mm:ss
+    const match = str.match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2}):(\d{2})/);
+    if (match) {
+        const [, year, month, day, hour, minute, second] = match;
+        return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second));
+    }
 
-    const [hour = 0, minute = 0, second = 0] = (timePart || '').split(':').map(Number);
-    if ([hour, minute, second].some(isNaN)) return null;
+    // Fallback cho định dạng khác
+    const date = new Date(str);
+    if (!isNaN(date.getTime())) {
+        return date;
+    }
 
-    return new Date(year, month - 1, day, hour, minute, second);
+    return null;
 };
 
 const toTimeInputValue = (value) => {
