@@ -119,8 +119,32 @@ const MyTickets = () => {
     });
   };
 
+  const isTicketExpired = (ticket) => {
+    const now = Date.now();
+    const bookingTime = ticket.booking_time ? new Date(ticket.booking_time).getTime() : 0;
+    const startTime = ticket.start_time ? new Date(ticket.start_time).getTime() : 0;
+    const durationMinutes = Number(ticket.movie_duration) || 0;
+    const endTime = startTime + durationMinutes * 60000;
+
+    if (ticket.status === 'pending' && bookingTime > 0 && bookingTime + 10 * 60000 <= now) {
+      return true;
+    }
+    if ((ticket.status === 'confirmed' || ticket.status === 'cancel') && startTime > 0 && endTime <= now) {
+      return true;
+    }
+    return false;
+  };
+
+  const getEffectiveStatus = (ticket) => {
+    if (isTicketExpired(ticket)) return 'expire';
+    return ticket.status;
+  };
+
   const getStatusLabel = (status) => statusLabels[status] || status;
-  const filteredTickets = tickets.filter(ticket => filter === 'all' || ticket.status === filter);
+  const filteredTickets = tickets.filter(ticket => {
+    const effectiveStatus = getEffectiveStatus(ticket);
+    return filter === 'all' || effectiveStatus === filter;
+  });
 
   // Hàm render giao diện đếm ngược 10 phút
   const renderCountdown = (bookingTimeStr) => {
@@ -136,6 +160,8 @@ const MyTickets = () => {
       return <span style={{color: 'gray'}}> (Đang xử lý hủy...)</span>;
     }
   };
+
+  const selectedEffectiveStatus = selectedTicket ? getEffectiveStatus(selectedTicket) : null;
 
   if (loading) return <div className="my-tickets-container"><p>Đang tải...</p></div>;
 
@@ -166,11 +192,11 @@ const MyTickets = () => {
             </div>
           ) : filteredTickets.map(ticket => {
             
-            // Check nếu thời gian đếm ngược cục bộ đã hết nhưng backend chưa kịp update
+            const effectiveStatus = getEffectiveStatus(ticket);
             const isPendingExpired = ticket.status === 'pending' && (new Date(ticket.booking_time).getTime() + 10 * 60000 <= currentTime.getTime());
 
             return (
-              <div key={ticket.id} className="ticket-card" data-status={ticket.status}>
+              <div key={ticket.id} className="ticket-card" data-status={effectiveStatus}>
                 <div className="ticket-header">
                   <div className="movie-info">
                     <img
@@ -188,10 +214,10 @@ const MyTickets = () => {
                       {/* Thêm hiển thị Phòng chiếu */}
                       <p><strong>Phòng chiếu:</strong> {ticket.room_name || 'Phòng 01'} - <strong>Ghế:</strong> {ticket.seat_number}</p>
                       
-                      <span className="status-chip" data-status={ticket.status}>
-                        {getStatusLabel(ticket.status)}
-                        {/* Gọi hàm đếm ngược nếu trạng thái đang chờ thanh toán */}
-                        {ticket.status === 'pending' && renderCountdown(ticket.booking_time)}
+                      <span className="status-chip" data-status={effectiveStatus}>
+                        {getStatusLabel(effectiveStatus)}
+                        {/* Gọi hàm đếm ngược nếu trạng thái đang chờ thanh toán và chưa hết hạn */}
+                        {ticket.status === 'pending' && !isPendingExpired && renderCountdown(ticket.booking_time)}
                       </span>
                     </div>
                   </div>
@@ -244,30 +270,30 @@ const MyTickets = () => {
                     <div><label>Ghế</label><p>{selectedTicket.seat_number}</p></div>
                     <div><label>Rạp</label><p>{selectedTicket.theater_name || 'TTV CINEMA'}</p></div>
                     <div><label>Giá vé</label><p>{Number(selectedTicket.total_price || 0).toLocaleString()} đ</p></div>
-                    <div><label>Trạng thái</label><p>{getStatusLabel(selectedTicket.status)}</p></div>
+                    <div><label>Trạng thái</label><p>{getStatusLabel(selectedEffectiveStatus)}</p></div>
                   </div>
                 </div>
 
                 <div className="ticket-right">
                   {/* Logic render mã QR hoặc thông báo tùy trạng thái */}
-                  {selectedTicket.status === 'confirmed' ? (
+                  {selectedEffectiveStatus === 'confirmed' ? (
                     <div className="qr-code">
                       <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=TICKET-${selectedTicket.id}`} alt="QR" />
                       <p>#{selectedTicket.id}</p>
                     </div>
-                  ) : selectedTicket.status === 'expire' ? (
+                  ) : selectedEffectiveStatus === 'expire' ? (
                     <div className="payment-waiting">
-                      <strong style={{color: 'gray'}}>{getStatusLabel(selectedTicket.status)}</strong>
+                      <strong style={{color: 'gray'}}>{getStatusLabel(selectedEffectiveStatus)}</strong>
                       <p>Suất chiếu này đã kết thúc.</p>
                     </div>
                   ) : (
                     <div className="payment-waiting">
-                      <strong>{getStatusLabel(selectedTicket.status)}</strong>
+                      <strong>{getStatusLabel(selectedEffectiveStatus)}</strong>
                       <p>QR sẽ hiển thị sau khi thanh toán được xác nhận.</p>
                     </div>
                   )}
-                  <div className="status-badge" data-status={selectedTicket.status}>
-                    {getStatusLabel(selectedTicket.status)}
+                  <div className="status-badge" data-status={selectedEffectiveStatus}>
+                    {getStatusLabel(selectedEffectiveStatus)}
                   </div>
                 </div>
               </div>
@@ -275,13 +301,13 @@ const MyTickets = () => {
               <div className="modal-footer">
                 <p>
                   {/* Cập nhật thông báo ghi chú footer theo 3 trạng thái chính */}
-                  {selectedTicket.status === 'confirmed'
+                  {selectedEffectiveStatus === 'confirmed'
                     ? '* Vé có hiệu lực đến hết thời gian suất chiếu. Vui lòng xuất trình mã QR tại quầy.'
-                    : selectedTicket.status === 'expire'
+                    : selectedEffectiveStatus === 'expire'
                     ? '* Vé đã hết hạn sử dụng.'
                     : '* Vé đang giữ chỗ và chờ xác nhận thanh toán.'}
                 </p>
-                {selectedTicket.status === 'pending' && (
+                {selectedEffectiveStatus === 'pending' && (
                   <div style={{ display: 'flex', gap: '10px' }}>
                     <button 
                       className="btn-pay-modal" 
