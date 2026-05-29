@@ -7,7 +7,8 @@ import { formatDateOnly } from '../utils/date';
 const toTimeInputValue = (value) => {
     if (!value) return '';
 
-    const date = new Date(value);
+    const normalized = String(value).replace(' ', 'T');
+    const date = new Date(normalized);
     if (Number.isNaN(date.getTime())) return '';
 
     const pad = (number) => String(number).padStart(2, '0');
@@ -17,7 +18,8 @@ const toTimeInputValue = (value) => {
 const toDateInputFromDateTime = (value) => {
     if (!value) return '';
 
-    const date = new Date(value);
+    const normalized = String(value).replace(' ', 'T');
+    const date = new Date(normalized);
     if (Number.isNaN(date.getTime())) return '';
 
     const pad = (number) => String(number).padStart(2, '0');
