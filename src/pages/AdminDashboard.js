@@ -88,6 +88,7 @@ const AdminDashboard = () => {
     const [editingShowtime, setEditingShowtime] = useState(null);
     const [seatShowtimeId, setSeatShowtimeId] = useState('');
     const [seats, setSeats] = useState([]);
+    const [bookingFilter, setBookingFilter] = useState('all');
     const [seatsToAdd, setSeatsToAdd] = useState('');
     const [seatsToDelete, setSeatsToDelete] = useState('');
     const navigate = useNavigate();
@@ -138,6 +139,17 @@ const AdminDashboard = () => {
 
     const selectedShowtimeMovie = movies.find(movie => String(movie.id) === String(showtimeForm.movie_id));
     const showtimeStartPreview = buildDateTimeValue(showtimeForm.show_date, showtimeForm.start_time);
+    const statusOrder = ['pending', 'confirmed', 'cancel'];
+    const sortedBookings = [...bookings].sort((a, b) => {
+        const timeA = a.start_time ? new Date(a.start_time).getTime() : 0;
+        const timeB = b.start_time ? new Date(b.start_time).getTime() : 0;
+        return timeB - timeA || (b.id - a.id);
+    });
+    const bookingsByStatus = statusOrder.reduce((acc, status) => {
+        acc[status] = sortedBookings.filter(b => b.status === status);
+        return acc;
+    }, {});
+    const filteredBookings = bookingFilter === 'all' ? sortedBookings : bookingsByStatus[bookingFilter] || [];
     const showtimeEndPreview = addMinutesToDateTimeValue(showtimeStartPreview, selectedShowtimeMovie?.duration);
 
     useEffect(() => {
@@ -772,6 +784,20 @@ const AdminDashboard = () => {
             {activeTab === 'bookings' && (
                 <div>
                     <h2>Quản Lý Đặt Vé</h2>
+                    <div style={bookingFilterRow}>
+                        {['all', 'pending', 'confirmed', 'cancel'].map(status => (
+                            <button
+                                key={status}
+                                onClick={() => setBookingFilter(status)}
+                                style={{
+                                    ...bookingFilterChip,
+                                    ...(bookingFilter === status ? bookingFilterChipActive : {})
+                                }}
+                            >
+                                {status === 'all' ? 'Tất cả' : bookingStatusLabel(status)} ({status === 'all' ? bookings.length : bookingsByStatus[status]?.length || 0})
+                            </button>
+                        ))}
+                    </div>
                     <table style={tableStyle}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid #444' }}>
@@ -787,26 +813,70 @@ const AdminDashboard = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {bookings.map(b => (
-                                <tr key={b.id} style={{ borderBottom: '1px solid #333' }}>
-                                    <td>{b.id}</td>
-                                    <td>{b.username}</td>
-                                    <td>{b.movie_title}</td>
-                                    <td>{b.theater_name}</td>
-                                    <td>{b.seat_number}</td>
-                                    <td>{b.start_time ? new Date(b.start_time).toLocaleString('vi-VN') : 'N/A'}</td>
-                                    <td>{b.end_time ? new Date(b.end_time).toLocaleString('vi-VN') : 'N/A'}</td>
-                                    <td>{bookingStatusLabel(b.status)}</td>
-                                    <td>
-                                        {b.status === 'pending' && (
-                                            <>
-                                                <button onClick={() => handleConfirmBooking(b.id)} style={smallConfirmBtn}>Xác nhận</button>
-                                                <button onClick={() => handleCancelBooking(b.id)} style={smallCancelBtn}>Hủy</button>
-                                            </>
-                                        )}
+                            {bookingFilter === 'all' ? (
+                                statusOrder.map(status => (
+                                    <React.Fragment key={status}>
+                                        <tr style={{ background: '#111', color: '#fff' }}>
+                                            <td colSpan={9} style={{ padding: '14px 10px', fontWeight: 700, borderBottom: '1px solid #333' }}>
+                                                {bookingStatusLabel(status)} ({bookingsByStatus[status]?.length || 0})
+                                            </td>
+                                        </tr>
+                                        {bookingsByStatus[status]?.length === 0 ? (
+                                            <tr key={`${status}-empty`} style={{ borderBottom: '1px solid #333' }}>
+                                                <td colSpan={9} style={{ padding: '14px 10px', color: '#aaa' }}>
+                                                    Không có vé {bookingStatusLabel(status).toLowerCase()}.
+                                                </td>
+                                            </tr>
+                                        ) : bookingsByStatus[status].map(b => (
+                                            <tr key={b.id} style={{ borderBottom: '1px solid #333' }}>
+                                                <td>{b.id}</td>
+                                                <td>{b.username}</td>
+                                                <td>{b.movie_title}</td>
+                                                <td>{b.theater_name}</td>
+                                                <td>{b.seat_number}</td>
+                                                <td>{b.start_time ? new Date(b.start_time).toLocaleString('vi-VN') : 'N/A'}</td>
+                                                <td>{b.end_time ? new Date(b.end_time).toLocaleString('vi-VN') : 'N/A'}</td>
+                                                <td>{bookingStatusLabel(b.status)}</td>
+                                                <td>
+                                                    {b.status === 'pending' && (
+                                                        <>
+                                                            <button onClick={() => handleConfirmBooking(b.id)} style={smallConfirmBtn}>Xác nhận</button>
+                                                            <button onClick={() => handleCancelBooking(b.id)} style={smallCancelBtn}>Hủy</button>
+                                                        </>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </React.Fragment>
+                                ))
+                            ) : filteredBookings.length === 0 ? (
+                                <tr style={{ borderBottom: '1px solid #333' }}>
+                                    <td colSpan={9} style={{ padding: '14px 10px', color: '#aaa' }}>
+                                        Không có vé phù hợp với bộ lọc.
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                filteredBookings.map(b => (
+                                    <tr key={b.id} style={{ borderBottom: '1px solid #333' }}>
+                                        <td>{b.id}</td>
+                                        <td>{b.username}</td>
+                                        <td>{b.movie_title}</td>
+                                        <td>{b.theater_name}</td>
+                                        <td>{b.seat_number}</td>
+                                        <td>{b.start_time ? new Date(b.start_time).toLocaleString('vi-VN') : 'N/A'}</td>
+                                        <td>{b.end_time ? new Date(b.end_time).toLocaleString('vi-VN') : 'N/A'}</td>
+                                        <td>{bookingStatusLabel(b.status)}</td>
+                                        <td>
+                                            {b.status === 'pending' && (
+                                                <>
+                                                    <button onClick={() => handleConfirmBooking(b.id)} style={smallConfirmBtn}>Xác nhận</button>
+                                                    <button onClick={() => handleCancelBooking(b.id)} style={smallCancelBtn}>Hủy</button>
+                                                </>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -1008,6 +1078,9 @@ const chartBar = { height: '100%', borderRadius: '999px', background: '#e50914' 
 const chartValue = { color: 'white', fontSize: '13px', textAlign: 'right' };
 const tableRow = { borderBottom: '1px solid #333' };
 const tableCell = { padding: '12px 10px' };
+const bookingFilterRow = { display: 'flex', flexWrap: 'wrap', gap: '10px', margin: '18px 0' };
+const bookingFilterChip = { border: '1px solid #444', background: '#111', color: '#ddd', padding: '10px 16px', borderRadius: '999px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s ease' };
+const bookingFilterChipActive = { background: '#e50914', color: '#fff', borderColor: '#e50914' };
 const adminFieldStyle = { display: 'block', marginBottom: '10px' };
 const adminLabelStyle = { display: 'block', marginBottom: '4px', color: '#ddd', fontSize: '13px', fontWeight: 600 };
 const showtimeHintStyle = { color: '#aaa', fontSize: '13px', margin: '-2px 0 16px' };
