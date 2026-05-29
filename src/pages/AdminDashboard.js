@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2, Plus } from 'lucide-react';
@@ -74,6 +74,9 @@ const AdminDashboard = () => {
     const [theaters, setTheaters] = useState([]);
     const [showtimes, setShowtimes] = useState([]);
     const [bookings, setBookings] = useState([]);
+    const [statistics, setStatistics] = useState(null);
+    const [statsLoading, setStatsLoading] = useState(false);
+    const [statsFilter, setStatsFilter] = useState({ from_date: '', to_date: '' });
     const [theaterForm, setTheaterForm] = useState({ name: '', capacity: '' });
     const [editingTheater, setEditingTheater] = useState(null);
     const [showtimeForm, setShowtimeForm] = useState({ movie_id: '', theater_id: '', room_name: '', show_date: '', start_time: '', price: '' });
@@ -101,6 +104,22 @@ const AdminDashboard = () => {
         api.get('/admin/bookings').then(res => setBookings(res.data));
     };
 
+    const fetchStatistics = useCallback(async () => {
+        try {
+            setStatsLoading(true);
+            const params = {};
+            if (statsFilter.from_date) params.from_date = statsFilter.from_date;
+            if (statsFilter.to_date) params.to_date = statsFilter.to_date;
+            const res = await api.get('/admin/statistics', { params });
+            setStatistics(res.data);
+        } catch (err) {
+            console.error('Lỗi lấy thống kê:', err);
+            setStatistics(null);
+        } finally {
+            setStatsLoading(false);
+        }
+    }, [statsFilter.from_date, statsFilter.to_date]);
+
     const fetchSeats = async (showtimeId) => {
         if (!showtimeId) return;
         try {
@@ -120,12 +139,16 @@ const AdminDashboard = () => {
         if (user?.role !== 'admin') {
             alert("Bạn không có quyền truy cập!");
             navigate('/');
+            return;
         }
         fetchMovies();
         fetchTheaters();
         fetchShowtimes();
         fetchBookings();
-    }, [user?.role, navigate]);
+        if (activeTab === 'statistics') {
+            fetchStatistics();
+        }
+    }, [user?.role, navigate, activeTab, fetchStatistics]);
 
     const handleDeleteMovie = async (id) => {
         if (window.confirm("Bạn có chắc chắn muốn xóa phim này?")) {
@@ -353,6 +376,7 @@ const AdminDashboard = () => {
                 <button onClick={() => setActiveTab('showtimes')} style={tabStyle(activeTab === 'showtimes')}>Quản Lý Suất Chiếu</button>
                 <button onClick={() => setActiveTab('seats')} style={tabStyle(activeTab === 'seats')}>Quản Lý Ghế</button>
                 <button onClick={() => setActiveTab('bookings')} style={tabStyle(activeTab === 'bookings')}>Quản Lý Đặt Vé</button>
+                <button onClick={() => setActiveTab('statistics')} style={tabStyle(activeTab === 'statistics')}>Thống Kê</button>
             </div>
 
             {activeTab === 'movies' && (
@@ -773,6 +797,144 @@ const AdminDashboard = () => {
                     </table>
                 </div>
             )}
+
+            {activeTab === 'statistics' && (
+                <div>
+                    <h2>Thống Kê Doanh Thu</h2>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '20px' }}>
+                        <div style={statCard}>
+                            <div style={statLabel}>Từ ngày</div>
+                            <input
+                                type="date"
+                                value={statsFilter.from_date}
+                                onChange={e => setStatsFilter(prev => ({ ...prev, from_date: e.target.value }))}
+                                style={filterInput}
+                            />
+                        </div>
+                        <div style={statCard}>
+                            <div style={statLabel}>Đến ngày</div>
+                            <input
+                                type="date"
+                                value={statsFilter.to_date}
+                                onChange={e => setStatsFilter(prev => ({ ...prev, to_date: e.target.value }))}
+                                style={filterInput}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                            <button onClick={fetchStatistics} style={buttonPrimary}>Làm mới</button>
+                        </div>
+                    </div>
+
+                    {statsLoading && <p>Đang tải thống kê...</p>}
+
+                    {!statsLoading && statistics && (
+                        <>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginTop: '24px' }}>
+                                <div style={metricCard}>
+                                    <div style={metricTitle}>Tổng doanh thu</div>
+                                    <div style={metricValue}>{statistics.total_revenue?.toLocaleString('vi-VN')} đ</div>
+                                </div>
+                                <div style={metricCard}>
+                                    <div style={metricTitle}>Vé đã bán</div>
+                                    <div style={metricValue}>{statistics.tickets_sold}</div>
+                                </div>
+                                <div style={metricCard}>
+                                    <div style={metricTitle}>Doanh thu chờ xử lý</div>
+                                    <div style={metricValue}>{statistics.pending_revenue?.toLocaleString('vi-VN')} đ</div>
+                                </div>
+                                <div style={metricCard}>
+                                    <div style={metricTitle}>Doanh thu đã hủy</div>
+                                    <div style={metricValue}>{statistics.canceled_revenue?.toLocaleString('vi-VN')} đ</div>
+                                </div>
+                                <div style={metricCard}>
+                                    <div style={metricTitle}>Giá vé TB</div>
+                                    <div style={metricValue}>{statistics.average_ticket_value?.toLocaleString('vi-VN')} đ</div>
+                                </div>
+                            </div>
+
+                            <section style={{ marginTop: '28px' }}>
+                                <h3>Doanh thu theo suất chiếu</h3>
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={tableStyle}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '1px solid #444' }}>
+                                                <th>Suất chiếu</th>
+                                                <th>Phim</th>
+                                                <th>Phòng</th>
+                                                <th>Rạp</th>
+                                                <th>Thời gian</th>
+                                                <th>Số vé</th>
+                                                <th>Doanh thu</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {statistics.revenue_by_showtime.map(item => (
+                                                <tr key={item.showtime_id} style={tableRow}>
+                                                    <td style={tableCell}>{item.showtime_id}</td>
+                                                    <td style={tableCell}>{item.movie_title}</td>
+                                                    <td style={tableCell}>{item.room_name || 'N/A'}</td>
+                                                    <td style={tableCell}>{item.theater_name}</td>
+                                                    <td style={tableCell}>{item.start_time ? new Date(item.start_time).toLocaleString('vi-VN') : 'N/A'}</td>
+                                                    <td style={tableCell}>{item.tickets_sold}</td>
+                                                    <td style={tableCell}>{Number(item.revenue).toLocaleString('vi-VN')} đ</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+
+                            <section style={{ marginTop: '24px' }}>
+                                <h3>Doanh thu theo phòng chiếu</h3>
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={tableStyle}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '1px solid #444' }}>
+                                                <th>Rạp</th>
+                                                <th>Doanh thu</th>
+                                                <th>Số vé</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {statistics.revenue_by_theater.map(item => (
+                                                <tr key={item.theater_id} style={tableRow}>
+                                                    <td style={tableCell}>{item.theater_name}</td>
+                                                    <td style={tableCell}>{Number(item.revenue).toLocaleString('vi-VN')} đ</td>
+                                                    <td style={tableCell}>{item.tickets_sold}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+
+                            <section style={{ marginTop: '24px' }}>
+                                <h3>Doanh thu theo phim</h3>
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={tableStyle}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '1px solid #444' }}>
+                                                <th>Phim</th>
+                                                <th>Doanh thu</th>
+                                                <th>Số vé</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {statistics.revenue_by_movie.map(item => (
+                                                <tr key={item.movie_id} style={tableRow}>
+                                                    <td style={tableCell}>{item.movie_title}</td>
+                                                    <td style={tableCell}>{Number(item.revenue).toLocaleString('vi-VN')} đ</td>
+                                                    <td style={tableCell}>{item.tickets_sold}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        </>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
@@ -790,6 +952,15 @@ const tabStyle = (active) => ({
     marginRight: '10px'
 });
 const inputStyle = { width: '100%', padding: '12px', margin: '10px 0', background: '#111', color: 'white', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' };
+const statCard = { background: '#111', border: '1px solid #333', borderRadius: '10px', padding: '16px', minWidth: '220px', width: '100%' };
+const statLabel = { color: '#bbb', marginBottom: '8px', fontSize: '13px' };
+const filterInput = { width: '100%', padding: '10px', background: '#111', color: 'white', border: '1px solid #444', borderRadius: '6px' };
+const buttonPrimary = { background: '#e50914', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer' };
+const metricCard = { background: '#111', border: '1px solid #333', borderRadius: '12px', padding: '18px', minHeight: '110px' };
+const metricTitle = { color: '#aaa', marginBottom: '12px', fontSize: '14px' };
+const metricValue = { color: 'white', fontSize: '24px', fontWeight: '700' };
+const tableRow = { borderBottom: '1px solid #333' };
+const tableCell = { padding: '12px 10px' };
 const adminFieldStyle = { display: 'block', marginBottom: '10px' };
 const adminLabelStyle = { display: 'block', marginBottom: '4px', color: '#ddd', fontSize: '13px', fontWeight: 600 };
 const showtimeHintStyle = { color: '#aaa', fontSize: '13px', margin: '-2px 0 16px' };
