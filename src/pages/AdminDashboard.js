@@ -4,23 +4,31 @@ import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2, Plus } from 'lucide-react';
 import { formatDateOnly } from '../utils/date';
 
-const toTimeInputValue = (value) => {
-    if (!value) return '';
+const parseLocalDateTime = (value) => {
+    if (!value) return null;
 
-    const normalized = String(value).replace(' ', 'T');
-    const date = new Date(normalized);
-    if (Number.isNaN(date.getTime())) return '';
+    const normalized = String(value).trim().replace('T', ' ').replace(/\//g, '-');
+    const [datePart, timePart = '00:00:00'] = normalized.split(' ');
+    const [year, month, day] = (datePart || '').split('-').map(Number);
+    if ([year, month, day].some(isNaN)) return null;
+
+    const [hour = 0, minute = 0, second = 0] = (timePart || '').split(':').map(Number);
+    if ([hour, minute, second].some(isNaN)) return null;
+
+    return new Date(year, month - 1, day, hour, minute, second);
+};
+
+const toTimeInputValue = (value) => {
+    const date = parseLocalDateTime(value);
+    if (!date) return '';
 
     const pad = (number) => String(number).padStart(2, '0');
     return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
 
 const toDateInputFromDateTime = (value) => {
-    if (!value) return '';
-
-    const normalized = String(value).replace(' ', 'T');
-    const date = new Date(normalized);
-    if (Number.isNaN(date.getTime())) return '';
+    const date = parseLocalDateTime(value);
+    if (!date) return '';
 
     const pad = (number) => String(number).padStart(2, '0');
     return [
@@ -38,11 +46,8 @@ const buildDateTimeValue = (dateValue, timeValue) => {
 };
 
 const addMinutesToDateTimeValue = (dateTimeValue, minutes) => {
-    if (!dateTimeValue || !minutes) return null;
-
-    const normalized = dateTimeValue.replace(' ', 'T');
-    const date = new Date(normalized);
-    if (Number.isNaN(date.getTime())) return null;
+    const date = parseLocalDateTime(dateTimeValue);
+    if (!date || !minutes) return null;
 
     date.setMinutes(date.getMinutes() + Number(minutes));
 
@@ -55,10 +60,8 @@ const addMinutesToDateTimeValue = (dateTimeValue, minutes) => {
 };
 
 const formatDateTimePreview = (dateTimeValue) => {
-    if (!dateTimeValue) return '';
-
-    const date = new Date(dateTimeValue.replace(' ', 'T'));
-    if (Number.isNaN(date.getTime())) return '';
+    const date = parseLocalDateTime(dateTimeValue);
+    if (!date) return '';
 
     return date.toLocaleString('vi-VN', {
         hour: '2-digit',
@@ -68,6 +71,21 @@ const formatDateTimePreview = (dateTimeValue) => {
         year: 'numeric',
         hour12: false
     });
+};
+
+const formatLocalDate = (value) => {
+    const date = parseLocalDateTime(value);
+    return date ? date.toLocaleDateString('vi-VN') : 'N/A';
+};
+
+const formatLocalTime = (value) => {
+    const date = parseLocalDateTime(value);
+    return date ? date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A';
+};
+
+const formatLocalDateTime = (value) => {
+    const date = parseLocalDateTime(value);
+    return date ? date.toLocaleString('vi-VN') : 'N/A';
 };
 
 const formatCurrency = (value) => {
@@ -143,8 +161,8 @@ const AdminDashboard = () => {
     const showtimeStartPreview = buildDateTimeValue(showtimeForm.show_date, showtimeForm.start_time);
     const statusOrder = ['pending', 'confirmed', 'cancel'];
     const sortedBookings = [...bookings].sort((a, b) => {
-        const timeA = a.start_time ? new Date(a.start_time).getTime() : 0;
-        const timeB = b.start_time ? new Date(b.start_time).getTime() : 0;
+        const timeA = a.start_time ? parseLocalDateTime(a.start_time)?.getTime() : 0;
+        const timeB = b.start_time ? parseLocalDateTime(b.start_time)?.getTime() : 0;
         return timeB - timeA || (b.id - a.id);
     });
     const bookingsByStatus = statusOrder.reduce((acc, status) => {
@@ -632,9 +650,9 @@ const AdminDashboard = () => {
                                     <td>{s.id}</td>
                                     <td>{s.movie_title}</td>
                                     <td>{s.theater_name}</td>
-                                    <td>{new Date(s.start_time).toLocaleDateString('vi-VN')}</td>
-                                    <td>{new Date(s.start_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })}</td>
-                                    <td>{s.end_time ? new Date(s.end_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false }) : '-'}</td>
+                                    <td>{formatLocalDate(s.start_time)}</td>
+                                    <td>{formatLocalTime(s.start_time)}</td>
+                                    <td>{s.end_time ? formatLocalTime(s.end_time) : '-'}</td>
                                     <td>{s.price}</td>
                                     <td>
                                         <Edit onClick={() => handleEditShowtime(s)} style={{ cursor: 'pointer', marginRight: '15px' }} color="gold" />
@@ -659,7 +677,7 @@ const AdminDashboard = () => {
                             >
                                 <option value="">Chọn suất chiếu</option>
                                 {showtimes.map(s => (
-                                    <option key={s.id} value={s.id}>{`${s.movie_title} | ${s.room_name || s.theater_name} | ${new Date(s.start_time).toLocaleString()}`}</option>
+                                    <option key={s.id} value={s.id}>{`${s.movie_title} | ${s.room_name || s.theater_name} | ${formatLocalDateTime(s.start_time)}`}</option>
                                 ))}
                             </select>
                         </div>
@@ -836,8 +854,8 @@ const AdminDashboard = () => {
                                                 <td>{b.movie_title}</td>
                                                 <td>{b.theater_name}</td>
                                                 <td>{b.seat_number}</td>
-                                                <td>{b.start_time ? new Date(b.start_time).toLocaleString('vi-VN') : 'N/A'}</td>
-                                                <td>{b.end_time ? new Date(b.end_time).toLocaleString('vi-VN') : 'N/A'}</td>
+                                                <td>{formatLocalDateTime(b.start_time)}</td>
+                                                <td>{formatLocalDateTime(b.end_time)}</td>
                                                 <td>{bookingStatusLabel(b.status)}</td>
                                                 <td>
                                                     {b.status === 'pending' && (
@@ -865,8 +883,8 @@ const AdminDashboard = () => {
                                         <td>{b.movie_title}</td>
                                         <td>{b.theater_name}</td>
                                         <td>{b.seat_number}</td>
-                                        <td>{b.start_time ? new Date(b.start_time).toLocaleString('vi-VN') : 'N/A'}</td>
-                                        <td>{b.end_time ? new Date(b.end_time).toLocaleString('vi-VN') : 'N/A'}</td>
+                                        <td>{formatLocalDateTime(b.start_time)}</td>
+                                        <td>{formatLocalDateTime(b.end_time)}</td>
                                         <td>{bookingStatusLabel(b.status)}</td>
                                         <td>
                                             {b.status === 'pending' && (
@@ -948,7 +966,7 @@ const AdminDashboard = () => {
                                         <div key={item.showtime_id} style={chartRow}>
                                             <div style={chartLabel}>
                                                 <div>{item.movie_title}</div>
-                                                <div style={chartSmallLabel}>{new Date(item.start_time).toLocaleString('vi-VN')}</div>
+                                                <div style={chartSmallLabel}>{formatLocalDateTime(item.start_time)}</div>
                                             </div>
                                             <div style={chartBarBackground}>
                                                 <div
@@ -986,7 +1004,7 @@ const AdminDashboard = () => {
                                                     <td style={tableCell}>{item.movie_title}</td>
                                                     <td style={tableCell}>{item.room_name || 'N/A'}</td>
                                                     <td style={tableCell}>{item.theater_name}</td>
-                                                    <td style={tableCell}>{item.start_time ? new Date(item.start_time).toLocaleString('vi-VN') : 'N/A'}</td>
+                                                    <td style={tableCell}>{formatLocalDateTime(item.start_time)}</td>
                                                     <td style={tableCell}>{item.tickets_sold}</td>
                                                     <td style={tableCell}>{Number(item.revenue).toLocaleString('vi-VN')} đ</td>
                                                 </tr>
