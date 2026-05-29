@@ -24,6 +24,11 @@ const MovieDetail = () => {
     const [movie, setMovie] = useState(null);
     const [showtimes, setShowtimes] = useState([]);
 
+    const isShowtimeInPast = (showtime) => {
+        const startTime = showtime?.start_time ? new Date(showtime.start_time).getTime() : 0;
+        return startTime > 0 && startTime <= Date.now();
+    };
+
     useEffect(() => {
         api.get(`/movies/${id}`)
             .then(res => setMovie(res.data))
@@ -94,7 +99,12 @@ const MovieDetail = () => {
                                     <ShowtimeCard
                                         key={st.id}
                                         st={st}
-                                        onClick={() => navigate(`/select-seat/${st.id}`)}
+                                        disabled={isShowtimeInPast(st)}
+                                        onClick={() => {
+                                            if (!isShowtimeInPast(st)) {
+                                                navigate(`/select-seat/${st.id}`);
+                                            }
+                                        }}
                                     />
                                 ))
                             ) : (
@@ -108,32 +118,41 @@ const MovieDetail = () => {
     );
 };
 
-const ShowtimeCard = ({ st, onClick }) => {
+const ShowtimeCard = ({ st, onClick, disabled }) => {
     const [hovered, setHovered] = useState(false);
+    const isPast = Boolean(disabled);
 
     return (
         <div
-            onClick={onClick}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
+            onClick={disabled ? undefined : onClick}
+            onMouseEnter={() => !disabled && setHovered(true)}
+            onMouseLeave={() => !disabled && setHovered(false)}
             style={{
                 ...styles.showtimeCard,
-                backgroundColor: hovered ? '#e50914' : '#fff',
-                color: hovered ? '#fff' : '#333',
-                boxShadow: hovered
-                    ? '0 4px 16px rgba(229,9,20,0.25)'
-                    : '0 2px 8px rgba(0,0,0,0.08)',
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                backgroundColor: disabled ? '#f4f4f4' : hovered ? '#e50914' : '#fff',
+                color: disabled ? '#888' : hovered ? '#fff' : '#333',
+                boxShadow: disabled
+                    ? '0 0 0 rgba(0,0,0,0)'
+                    : hovered
+                        ? '0 4px 16px rgba(229,9,20,0.25)'
+                        : '0 2px 8px rgba(0,0,0,0.08)',
             }}
         >
-            <div style={{ fontWeight: '600', fontSize: '13px', marginBottom: '6px', opacity: hovered ? 1 : 0.7 }}>
+            <div style={{ fontWeight: '600', fontSize: '13px', marginBottom: '6px', opacity: isPast ? 0.7 : hovered ? 1 : 0.7 }}>
                 {st.theater_name}{st.room_name ? ` — ${st.room_name}` : ''}
             </div>
             <div style={{ fontSize: '22px', fontWeight: 'bold', margin: '4px 0' }}>
                 {new Date(st.start_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })}
             </div>
-            <div style={{ fontSize: '12px', opacity: hovered ? 0.85 : 0.5 }}>
+            <div style={{ fontSize: '12px', opacity: isPast ? 0.7 : hovered ? 0.85 : 0.5 }}>
                 {new Date(st.start_time).toLocaleDateString('vi-VN')}
             </div>
+            {isPast && (
+                <div style={{ marginTop: '8px', fontSize: '12px', color: '#888' }}>
+                    Suất đã qua
+                </div>
+            )}
         </div>
     );
 };

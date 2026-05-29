@@ -10,6 +10,10 @@ const SeatSelection = () => {
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [showtimeInfo, setShowtimeInfo] = useState(null);
 
+    const isShowtimePast = showtimeInfo?.start_time
+        ? new Date(showtimeInfo.start_time).getTime() <= Date.now()
+        : false;
+
     useEffect(() => {
     // Gọi API lấy thông tin suất chiếu
     api.get(`/movies/showtime/${showtimeId}`)
@@ -54,6 +58,11 @@ const SeatSelection = () => {
     };
 
     const handleBooking = async () => {
+        if (isShowtimePast) {
+            alert("Suất chiếu đã qua. Không thể đặt vé nữa.");
+            return;
+        }
+
         try {
             const user = JSON.parse(localStorage.getItem('user'));
             if (!user) {
@@ -121,8 +130,8 @@ const SeatSelection = () => {
                             {groupedSeats[rowLabel].map(seat => (
                                 <div
                                     key={seat.id}
-                                    className={`seat-box ${seat.is_booked ? 'booked' : ''} ${selectedSeats.find(s => s.id === seat.id) ? 'selected' : ''}`}
-                                    onClick={() => toggleSeat(seat)}
+                                    className={`seat-box ${seat.is_booked ? 'booked' : ''} ${selectedSeats.find(s => s.id === seat.id) ? 'selected' : ''}${isShowtimePast ? ' disabled' : ''}`}
+                                    onClick={() => !isShowtimePast && toggleSeat(seat)}
                                 >
                                     {seat.seat_number.substring(1)}
                                 </div>
@@ -144,9 +153,14 @@ const SeatSelection = () => {
                         <span className="total-price-text">{totalPrice.toLocaleString()} VNĐ</span>
                     </div>
                 </div>
+                {isShowtimePast && (
+                    <div className="expired-message" style={{ color: '#d00', marginBottom: '12px' }}>
+                        Suất chiếu đã qua. Không thể đặt vé nữa.
+                    </div>
+                )}
                 <button 
                     className="btn-booking-confirm" 
-                    disabled={selectedSeats.length === 0}
+                    disabled={selectedSeats.length === 0 || isShowtimePast}
                     onClick={handleBooking}
                 >
                     XÁC NHẬN ĐẶT VÉ

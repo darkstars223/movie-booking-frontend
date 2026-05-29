@@ -149,6 +149,11 @@ const MovieRow = ({ movie, showtimes, onSelect }) => {
     return acc;
   }, {});
 
+  const isShowtimeInPast = (showtime) => {
+    const startTime = showtime?.start_time ? new Date(showtime.start_time).getTime() : 0;
+    return startTime > 0 && startTime <= Date.now();
+  };
+
   return (
     <div style={styles.movieCard}>
       <img
@@ -163,7 +168,7 @@ const MovieRow = ({ movie, showtimes, onSelect }) => {
             <p style={styles.theaterName}>{theater}</p>
             <div style={styles.showtimeRow}>
               {sts.map(st => (
-                <ShowtimeBtn key={st.id} st={st} onSelect={onSelect} />
+                <ShowtimeBtn key={st.id} st={st} onSelect={onSelect} disabled={isShowtimeInPast(st)} />
               ))}
             </div>
           </div>
@@ -173,22 +178,27 @@ const MovieRow = ({ movie, showtimes, onSelect }) => {
   );
 };
 
-const ShowtimeBtn = ({ st, onSelect }) => {
+const ShowtimeBtn = ({ st, onSelect, disabled }) => {
   const [hovered, setHovered] = useState(false);
+  const isPast = Boolean(disabled);
   return (
     <button
-      onClick={() => onSelect(st.id)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onClick={() => { if (!isPast) onSelect(st.id); }}
+      onMouseEnter={() => !isPast && setHovered(true)}
+      onMouseLeave={() => !isPast && setHovered(false)}
+      disabled={isPast}
       style={{
         ...styles.showtimeBtn,
-        backgroundColor: hovered ? '#e50914' : '#fff',
-        color: hovered ? '#fff' : '#333',
-        borderColor: hovered ? '#e50914' : '#ddd',
+        opacity: isPast ? 0.55 : 1,
+        cursor: isPast ? 'not-allowed' : 'pointer',
+        backgroundColor: isPast ? '#f5f5f5' : hovered ? '#e50914' : '#fff',
+        color: isPast ? '#888' : hovered ? '#fff' : '#333',
+        borderColor: hovered && !isPast ? '#e50914' : '#ddd',
       }}
     >
       {new Date(st.start_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })}
       {st.room_name && <span style={{ fontSize: '11px', opacity: 0.7, marginLeft: '4px' }}>· {st.room_name}</span>}
+      {isPast && <span style={{ marginLeft: '8px', fontSize: '11px' }}>Đã qua</span>}
     </button>
   );
 };
