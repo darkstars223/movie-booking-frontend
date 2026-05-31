@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import './MyTickets.css';
 
-// Cập nhật trạng thái thành 'cancel' và 'expire'
+// Cập nhật trạng thái thành 'cancel' và 'expired'
 const statusLabels = {
   pending: 'Chờ thanh toán',
   confirmed: 'Đã xác nhận',
-  cancel: ' Đã hủy',
-  expire: ' Đã hết hạn'
+  cancel: 'Đã hủy',
+  expired: 'Đã hết hạn'
 };
 
 const MyTickets = () => {
@@ -129,14 +129,14 @@ const MyTickets = () => {
     if (ticket.status === 'pending' && bookingTime > 0 && bookingTime + 10 * 60000 <= now) {
       return true;
     }
-    if ((ticket.status === 'confirmed' || ticket.status === 'cancel') && startTime > 0 && endTime <= now) {
+    if (ticket.status === 'confirmed' && startTime > 0 && endTime <= now) {
       return true;
     }
     return false;
   };
 
   const getEffectiveStatus = (ticket) => {
-    if (isTicketExpired(ticket)) return 'expire';
+    if (isTicketExpired(ticket)) return 'expired';
     return ticket.status;
   };
 
@@ -174,7 +174,7 @@ const MyTickets = () => {
 
         <div className="filter-section">
           {/* Thêm filter 'expire' vào danh sách */}
-          {['all', 'pending', 'confirmed', 'cancel', 'expire'].map(type => (
+          {['all', 'pending', 'confirmed', 'cancel', 'expired'].map(type => (
             <button
               key={type}
               className={`filter-btn ${filter === type ? 'active' : ''}`}
@@ -281,7 +281,7 @@ const MyTickets = () => {
                       <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=TICKET-${selectedTicket.id}`} alt="QR" />
                       <p>#{selectedTicket.id}</p>
                     </div>
-                  ) : selectedEffectiveStatus === 'expire' ? (
+                  ) : selectedEffectiveStatus === 'expired' ? (
                     <div className="payment-waiting">
                       <strong style={{color: 'gray'}}>{getStatusLabel(selectedEffectiveStatus)}</strong>
                       <p>Suất chiếu này đã kết thúc.</p>
@@ -303,7 +303,7 @@ const MyTickets = () => {
                   {/* Cập nhật thông báo ghi chú footer theo 3 trạng thái chính */}
                   {selectedEffectiveStatus === 'confirmed'
                     ? '* Vé có hiệu lực đến hết thời gian suất chiếu. Vui lòng xuất trình mã QR tại quầy.'
-                    : selectedEffectiveStatus === 'expire'
+                    : selectedEffectiveStatus === 'expired'
                     ? '* Vé đã hết hạn sử dụng.'
                     : '* Vé đang giữ chỗ và chờ xác nhận thanh toán.'}
                 </p>

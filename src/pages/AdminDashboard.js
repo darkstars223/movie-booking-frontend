@@ -167,7 +167,7 @@ const AdminDashboard = () => {
 
     const selectedShowtimeMovie = movies.find(movie => String(movie.id) === String(showtimeForm.movie_id));
     const showtimeStartPreview = buildDateTimeValue(showtimeForm.show_date, showtimeForm.start_time);
-    const statusOrder = ['pending', 'confirmed', 'cancel'];
+    const statusOrder = ['pending', 'confirmed', 'expired', 'cancel'];
     const sortedBookings = [...bookings].sort((a, b) => {
         const timeA = a.start_time ? parseLocalDateTime(a.start_time)?.getTime() : 0;
         const timeB = b.start_time ? parseLocalDateTime(b.start_time)?.getTime() : 0;
@@ -408,6 +408,7 @@ const AdminDashboard = () => {
         const labels = {
             pending: 'Chờ thanh toán',
             confirmed: 'Đã xác nhận',
+            expired: 'Đã hết hạn',
             cancel: 'Đã hủy'
         };
         return labels[status] || status;
@@ -814,7 +815,7 @@ const AdminDashboard = () => {
                 <div>
                     <h2>Quản Lý Đặt Vé</h2>
                     <div style={bookingFilterRow}>
-                        {['all', 'pending', 'confirmed', 'cancel'].map(status => (
+                        {['all', 'pending', 'confirmed', 'expired', 'cancel'].map(status => (
                             <button
                                 key={status}
                                 onClick={() => setBookingFilter(status)}
@@ -958,6 +959,10 @@ const AdminDashboard = () => {
                                 <div style={metricCard}>
                                     <div style={metricTitle}>Doanh thu đã hủy</div>
                                     <div style={metricValue}>{statistics.canceled_revenue?.toLocaleString('vi-VN')} đ</div>
+                                </div>
+                                <div style={metricCard}>
+                                    <div style={metricTitle}>Doanh thu vé hết hạn</div>
+                                    <div style={metricValue}>{statistics.expired_revenue?.toLocaleString('vi-VN')} đ</div>
                                 </div>
                                 <div style={metricCard}>
                                     <div style={metricTitle}>Giá vé TB</div>
