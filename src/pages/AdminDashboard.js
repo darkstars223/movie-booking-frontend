@@ -242,21 +242,31 @@ const AdminDashboard = () => {
             return <div style={{ color: '#64748b', padding: '16px 0' }}>Không có dữ liệu biểu đồ.</div>;
         }
 
+        const CHART_HEIGHT = 150; // px cố định cho vùng bar
         const maxValue = Math.max(...items.map(item => Number(item[valueKey] || 0)), 1);
         return (
             <div style={miniRevenueChartGrid}>
-                {items.map((item, idx) => (
-                    <div key={idx} style={miniRevenueColumn}>
-                        <div
-                            style={{
-                                ...miniRevenueBar,
-                                height: `${Math.max(16, (Number(item[valueKey] || 0) / maxValue) * 100)}%`
-                            }}
-                        />
-                        <div style={miniRevenueValue}>{Number(item[valueKey] || 0).toLocaleString('vi-VN')} đ</div>
-                        <div style={miniRevenueLabel}>{String(item[labelKey] || item.movie_title || item.theater_name || 'N/A')}</div>
-                    </div>
-                ))}
+                {items.map((item, idx) => {
+                    const val = Number(item[valueKey] || 0);
+                    const barHeight = Math.max(6, (val / maxValue) * CHART_HEIGHT);
+                    return (
+                        <div key={idx} style={{ ...miniRevenueColumn, minHeight: 'unset' }}>
+                            {/* value label trên thanh */}
+                            <div style={miniRevenueValue}>{val.toLocaleString('vi-VN')} đ</div>
+                            {/* vùng bar cố định chiều cao */}
+                            <div style={{ height: `${CHART_HEIGHT}px`, display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                <div
+                                    style={{
+                                        ...miniRevenueBar,
+                                        height: `${barHeight}px`,
+                                        width: '100%'
+                                    }}
+                                />
+                            </div>
+                            <div style={miniRevenueLabel}>{String(item[labelKey] || item.movie_title || item.theater_name || 'N/A')}</div>
+                        </div>
+                    );
+                })}
             </div>
         );
     };
@@ -306,11 +316,12 @@ const AdminDashboard = () => {
             );
         }
 
+        const BAR_HEIGHT = 200; // px
         return (
-            <div style={timelineBarWrapper}>
+            <div style={{ ...timelineBarWrapper, minHeight: `${BAR_HEIGHT + 60}px`, alignItems: 'flex-end' }}>
                 {dots.map((point, idx) => (
                     <div key={idx} style={timelineBarColumn}>
-                        <div style={{ ...timelineBarFill, height: `${Math.max(16, (point.value / maxValue) * 100)}%` }} />
+                        <div style={{ ...timelineBarFill, height: `${Math.max(6, (point.value / maxValue) * BAR_HEIGHT)}px` }} />
                         <div style={timelineBarAmount}>{Number(point.value).toLocaleString('vi-VN')} đ</div>
                         <div style={timelineBarLabel}>{point.label}</div>
                     </div>
@@ -1292,14 +1303,14 @@ const timelineChartWrapper = { width: '100%', minHeight: '240px', position: 'rel
 const timelineSvg = { width: '100%', height: '240px', overflow: 'visible', display: 'block' };
 const timelineLabels = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '8px', marginTop: '12px', alignItems: 'center', justifyItems: 'center' };
 const timelineLabel = { color: '#64748b', fontSize: '12px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' };
-const timelineBarWrapper = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))', gap: '18px', alignItems: 'flex-end', minHeight: '240px' };
-const timelineBarColumn = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' };
-const timelineBarFill = { width: '100%', minHeight: '6%', background: '#0d6efd', borderRadius: '12px 12px 0 0', alignSelf: 'flex-end' };
+const timelineBarWrapper = { display: 'flex', flexWrap: 'wrap', gap: '18px', alignItems: 'flex-end', minHeight: '260px' };
+const timelineBarColumn = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' };
+const timelineBarFill = { width: '48px', minHeight: '6px', background: '#0d6efd', borderRadius: '12px 12px 0 0' };
 const timelineBarAmount = { color: '#102a43', fontSize: '12px', textAlign: 'center' };
 const timelineBarLabel = { color: '#475569', fontSize: '12px', textAlign: 'center' };
 const miniChartSection = { background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px', marginBottom: '16px' };
 const miniRevenueChartGrid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '16px', alignItems: 'end' };
-const miniRevenueColumn = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', minHeight: '150px' };
+const miniRevenueColumn = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' };
 const miniRevenueBar = { width: '100%', background: '#0d6efd', borderRadius: '12px 12px 0 0', transition: 'height 0.25s ease' };
 const miniRevenueValue = { fontSize: '12px', color: '#0f172a', textAlign: 'center' };
 const miniRevenueLabel = { fontSize: '12px', color: '#475569', textAlign: 'center', lineHeight: '1.3' };
