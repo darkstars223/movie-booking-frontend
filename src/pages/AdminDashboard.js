@@ -278,12 +278,22 @@ const AdminDashboard = () => {
 
         const maxValue = Math.max(...revenueTimeline.map(item => Number(item.revenue || 0)), 1);
         const xCount = revenueTimeline.length;
-        const labels = revenueTimeline.map(item => item.date);
+        const formatChartDate = (dateStr) => {
+            if (!dateStr) return '';
+            // Parse ISO or MySQL date string
+            const d = new Date(dateStr);
+            if (!isNaN(d.getTime())) {
+                return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+            }
+            // fallback: take first 10 chars YYYY-MM-DD
+            return String(dateStr).slice(0, 10);
+        };
+        const labels = revenueTimeline.map(item => formatChartDate(item.date));
         const dots = revenueTimeline.map((item, index) => {
             const value = Number(item.revenue || 0);
             const x = xCount === 1 ? 50 : 5 + (index / (xCount - 1)) * 90;
             const y = 90 - (value / maxValue) * 70;
-            return { x, y, value, label: item.date };
+            return { x, y, value, label: formatChartDate(item.date) };
         });
 
         if (chartType === 'line') {
@@ -1056,8 +1066,9 @@ const AdminDashboard = () => {
             {activeTab === 'statistics' && (
                 <div>
                     <h2>Thống Kê Doanh Thu</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginTop: '20px' }}>
-                        <div style={statCard}>
+                    {/* Hàng 1: Các input filter */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '20px', alignItems: 'flex-end' }}>
+                        <div style={{ ...statCard, flex: '1 1 150px', minWidth: '140px', maxWidth: '220px' }}>
                             <div style={statLabel}>Từ ngày</div>
                             <input
                                 type="date"
@@ -1066,7 +1077,7 @@ const AdminDashboard = () => {
                                 style={filterInput}
                             />
                         </div>
-                        <div style={statCard}>
+                        <div style={{ ...statCard, flex: '1 1 150px', minWidth: '140px', maxWidth: '220px' }}>
                             <div style={statLabel}>Đến ngày</div>
                             <input
                                 type="date"
@@ -1075,14 +1086,14 @@ const AdminDashboard = () => {
                                 style={filterInput}
                             />
                         </div>
-                        <div style={statCard}>
+                        <div style={{ ...statCard, flex: '1 1 150px', minWidth: '140px', maxWidth: '200px' }}>
                             <div style={statLabel}>Dạng biểu đồ</div>
                             <select value={chartType} onChange={e => setChartType(e.target.value)} style={filterInput}>
                                 <option value="line">Dạng đường kẻ</option>
                                 <option value="bar">Dạng cột</option>
                             </select>
                         </div>
-                        <div style={statCard}>
+                        <div style={{ ...statCard, flex: '2 1 180px', minWidth: '180px' }}>
                             <div style={statLabel}>Tìm phim / số vé</div>
                             <input
                                 type="text"
@@ -1092,12 +1103,10 @@ const AdminDashboard = () => {
                                 style={filterInput}
                             />
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
                             <button onClick={() => applyQuickRange('day')} style={quickFilterBtn(quickRange === 'day')}>Trong ngày</button>
                             <button onClick={() => applyQuickRange('week')} style={quickFilterBtn(quickRange === 'week')}>Tuần</button>
                             <button onClick={() => applyQuickRange('month')} style={quickFilterBtn(quickRange === 'month')}>Tháng</button>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
                             <button onClick={() => fetchStatistics()} style={buttonPrimary}>Làm mới</button>
                         </div>
                     </div>
