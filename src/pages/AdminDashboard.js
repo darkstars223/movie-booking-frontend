@@ -280,26 +280,21 @@ const AdminDashboard = () => {
             const path = dots.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x},${point.y}`).join(' ');
             return (
                 <div style={timelineChartWrapper}>
-                    <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={timelineSvg}>
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="xMinYMin meet" style={timelineSvg}>
                         {Array.from({ length: 5 }).map((_, index) => (
                             <line
                                 key={index}
                                 x1="5"
                                 x2="95"
-                                y1={10 + index * 18}
-                                y2={10 + index * 18}
+                                y1={15 + index * 17}
+                                y2={15 + index * 17}
                                 stroke="#e2e8f0"
                                 strokeWidth="0.4"
                             />
                         ))}
-                        <path d={path} fill="none" stroke="#0d6efd" strokeWidth="1.6" strokeLinecap="round" />
+                        <path d={path} fill="none" stroke="#0d6efd" strokeWidth="1.4" strokeLinecap="round" />
                         {dots.map((point, idx) => (
-                            <g key={idx}>
-                                <circle cx={point.x} cy={point.y} r="2.2" fill="#0d6efd" />
-                                <text x={point.x} y={point.y - 4} fontSize="2.8" fill="#0f172a" textAnchor="middle">
-                                    {Number(point.value).toLocaleString('vi-VN')}
-                                </text>
-                            </g>
+                            <circle key={idx} cx={point.x} cy={point.y} r="2.2" fill="#0d6efd" />
                         ))}
                     </svg>
                     <div style={timelineLabels}>
@@ -1293,11 +1288,11 @@ const chartValue = { color: '#102a43', fontSize: '13px', textAlign: 'right' };
 const chartIntroRow = { display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', marginBottom: '16px', color: '#334155' };
 const chartSummary = { display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '999px', padding: '10px 14px', color: '#0f172a' };
 const timelineChartCard = { background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px', boxShadow: '0 6px 18px rgba(15, 23, 42, 0.05)' };
-const timelineChartWrapper = { width: '100%', minHeight: '240px', position: 'relative' };
-const timelineSvg = { width: '100%', height: '260px', overflow: 'visible' };
-const timelineLabels = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '8px', marginTop: '14px' };
-const timelineLabel = { color: '#64748b', fontSize: '12px', textAlign: 'center' };
-const timelineBarWrapper = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))', gap: '18px', alignItems: 'flex-end', minHeight: '220px' };
+const timelineChartWrapper = { width: '100%', minHeight: '240px', position: 'relative', boxSizing: 'border-box', padding: '0 8px' };
+const timelineSvg = { width: '100%', height: '240px', overflow: 'visible', display: 'block' };
+const timelineLabels = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '8px', marginTop: '12px', alignItems: 'center', justifyItems: 'center' };
+const timelineLabel = { color: '#64748b', fontSize: '12px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' };
+const timelineBarWrapper = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))', gap: '18px', alignItems: 'flex-end', minHeight: '240px' };
 const timelineBarColumn = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' };
 const timelineBarFill = { width: '100%', minHeight: '6%', background: '#0d6efd', borderRadius: '12px 12px 0 0', alignSelf: 'flex-end' };
 const timelineBarAmount = { color: '#102a43', fontSize: '12px', textAlign: 'center' };
