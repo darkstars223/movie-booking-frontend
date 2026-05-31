@@ -296,43 +296,78 @@ const AdminDashboard = () => {
         });
 
         if (chartType === 'line') {
-            // Dùng viewBox ngang cố định để SVG fill đầy container
-            const W = 1000, H = 260, PAD_L = 60, PAD_R = 30, PAD_T = 20, PAD_B = 40;
+            const W = 1000, H = 280, PAD_L = 80, PAD_R = 30, PAD_T = 20, PAD_B = 50;
             const chartW = W - PAD_L - PAD_R;
             const chartH = H - PAD_T - PAD_B;
-            const scaledDots = revenueTimeline.map((item, index) => {
+
+            // Tính X theo timestamp thực tế để khoảng cách ngày đúng
+            const timestamps = revenueTimeline.map(item => new Date(item.date).getTime());
+            const minTs = Math.min(...timestamps);
+            const maxTs = Math.max(...timestamps);
+            const tsRange = maxTs - minTs || 1;
+
+            const scaledDots = revenueTimeline.map((item) => {
                 const value = Number(item.revenue || 0);
-                const x = PAD_L + (xCount === 1 ? chartW / 2 : (index / (xCount - 1)) * chartW);
+                const ts = new Date(item.date).getTime();
+                const x = PAD_L + (xCount === 1 ? chartW / 2 : ((ts - minTs) / tsRange) * chartW);
                 const y = PAD_T + chartH - (value / maxValue) * chartH;
                 return { x, y, value, label: formatChartDate(item.date) };
             });
-            const linePath = scaledDots.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x},${p.y}`).join(' ');
-            // Y-axis grid lines + labels
+
+            const linePath = scaledDots.map((p, i) => (i === 0 ? 'M' : 'L') + ' ' + p.x + ',' + p.y).join(' ');
+
+            // Area fill dưới đường
+            const areaPath = linePath + ' L ' + scaledDots[scaledDots.length-1].x + ',' + (PAD_T + chartH)
+                + ' L ' + PAD_L + ',' + (PAD_T + chartH) + ' Z';
+
+            // Y-axis: 5 mốc
             const gridLines = Array.from({ length: 5 }, (_, i) => {
                 const frac = i / 4;
                 const yPos = PAD_T + chartH * frac;
                 const val = maxValue * (1 - frac);
-                return { yPos, val };
+                const label = val >= 1000000
+                    ? (val / 1000000).toFixed(1) + 'M'
+                    : val >= 1000
+                        ? Math.round(val / 1000) + 'k'
+                        : Math.round(val).toString();
+                return { yPos, label };
             });
+
             return (
-                <div style={{ ...timelineChartWrapper, padding: 0 }}>
-                    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: '100%', display: 'block', overflow: 'visible' }}>
+                <div style={{ ...timelineChartWrapper, padding: '8px 0 0 0' }}>
+                    <svg viewBox={'0 0 ' + W + ' ' + H} style={{ width: '100%', display: 'block', overflow: 'visible' }}>
+                        <defs>
+                            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#0d6efd" stopOpacity="0.18" />
+                                <stop offset="100%" stopColor="#0d6efd" stopOpacity="0" />
+                            </linearGradient>
+                        </defs>
                         {/* Grid lines + Y labels */}
                         {gridLines.map((g, i) => (
                             <g key={i}>
-                                <line x1={PAD_L} x2={W - PAD_R} y1={g.yPos} y2={g.yPos} stroke="#e2e8f0" strokeWidth="1" />
-                                <text x={PAD_L - 8} y={g.yPos + 4} textAnchor="end" fontSize="20" fill="#94a3b8">
-                                    {g.val >= 1000 ? `${Math.round(g.val/1000)}k` : Math.round(g.val)}
-                                </text>
+                                <line x1={PAD_L} x2={W - PAD_R} y1={g.yPos} y2={g.yPos}
+                                    stroke={i === 0 ? '#cbd5e1' : '#e2e8f0'} strokeWidth="1" strokeDasharray={i === 0 ? 'none' : '4 3'} />
+                                <text x={PAD_L - 10} y={g.yPos + 5} textAnchor="end" fontSize="18" fill="#94a3b8">{g.label}</text>
                             </g>
                         ))}
+                        {/* Baseline */}
+                        <line x1={PAD_L} x2={W - PAD_R} y1={PAD_T + chartH} y2={PAD_T + chartH} stroke="#cbd5e1" strokeWidth="1.5" />
+                        {/* Area */}
+                        <path d={areaPath} fill="url(#areaGrad)" />
                         {/* Line */}
-                        <path d={linePath} fill="none" stroke="#0d6efd" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                        {/* Dots + X labels */}
+                        <path d={linePath} fill="none" stroke="#0d6efd" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                        {/* Dots + tooltip value + X label */}
                         {scaledDots.map((p, idx) => (
                             <g key={idx}>
-                                <circle cx={p.x} cy={p.y} r="6" fill="#0d6efd" />
-                                <text x={p.x} y={H - 6} textAnchor="middle" fontSize="20" fill="#64748b">{p.label}</text>
+                                <circle cx={p.x} cy={p.y} r="5" fill="#fff" stroke="#0d6efd" strokeWidth="2.5" />
+                                <text x={p.x} y={p.y - 12} textAnchor="middle" fontSize="17" fill="#0d6efd" fontWeight="600">
+                                    {p.value >= 1000000
+                                        ? (p.value / 1000000).toFixed(1) + 'M'
+                                        : p.value >= 1000
+                                            ? Math.round(p.value / 1000) + 'k'
+                                            : p.value.toString()}
+                                </text>
+                                <text x={p.x} y={H - 8} textAnchor="middle" fontSize="18" fill="#64748b">{p.label}</text>
                             </g>
                         ))}
                     </svg>
