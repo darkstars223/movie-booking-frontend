@@ -229,8 +229,37 @@ const AdminDashboard = () => {
     const revenueTimeline = statistics?.revenue_by_date || [];
     const filteredRevenueByMovie = filterRevenueRows(statistics?.revenue_by_movie || []);
     const filteredRevenueByShowtime = filterRevenueRows(statistics?.revenue_by_showtime || []);
+    const filteredRevenueByTheater = filterRevenueRows(statistics?.revenue_by_theater || []);
     const totalTimelineRevenue = revenueTimeline.reduce((sum, item) => sum + Number(item.revenue || 0), 0);
     const totalTimelineOrders = revenueTimeline.reduce((sum, item) => sum + Number(item.orders || 0), 0);
+    const topShowtimeCharts = filteredRevenueByShowtime.slice().sort((a, b) => Number(b.revenue) - Number(a.revenue)).slice(0, 6);
+    const topTheaterCharts = filteredRevenueByTheater.slice().sort((a, b) => Number(b.revenue) - Number(a.revenue)).slice(0, 6);
+    const topMovieCharts = filteredRevenueByMovie.slice().sort((a, b) => Number(b.revenue) - Number(a.revenue)).slice(0, 6);
+    const maxShowtimeRevenue = topShowtimeCharts.length ? Math.max(...topShowtimeCharts.map(item => Number(item.revenue) || 0)) : 1;
+
+    const renderMiniRevenueChart = (items, labelKey, valueKey) => {
+        if (!items.length) {
+            return <div style={{ color: '#64748b', padding: '16px 0' }}>Không có dữ liệu biểu đồ.</div>;
+        }
+
+        const maxValue = Math.max(...items.map(item => Number(item[valueKey] || 0)), 1);
+        return (
+            <div style={miniRevenueChartGrid}>
+                {items.map((item, idx) => (
+                    <div key={idx} style={miniRevenueColumn}>
+                        <div
+                            style={{
+                                ...miniRevenueBar,
+                                height: `${Math.max(16, (Number(item[valueKey] || 0) / maxValue) * 100)}%`
+                            }}
+                        />
+                        <div style={miniRevenueValue}>{Number(item[valueKey] || 0).toLocaleString('vi-VN')} đ</div>
+                        <div style={miniRevenueLabel}>{String(item[labelKey] || item.movie_title || item.theater_name || 'N/A')}</div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
 
     const renderTimelineChart = () => {
         if (!revenueTimeline.length) {
@@ -242,22 +271,34 @@ const AdminDashboard = () => {
         const labels = revenueTimeline.map(item => item.date);
         const dots = revenueTimeline.map((item, index) => {
             const value = Number(item.revenue || 0);
-            const left = xCount === 1 ? 50 : (index / (xCount - 1)) * 100;
-            const heightRatio = value / maxValue;
-            const top = 100 - heightRatio * 100;
-            return { left, top, value, label: item.date };
+            const x = xCount === 1 ? 50 : 5 + (index / (xCount - 1)) * 90;
+            const y = 90 - (value / maxValue) * 70;
+            return { x, y, value, label: item.date };
         });
 
         if (chartType === 'line') {
-            const path = dots.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.left},${point.top}`).join(' ');
+            const path = dots.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x},${point.y}`).join(' ');
             return (
                 <div style={timelineChartWrapper}>
                     <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={timelineSvg}>
-                        <path d={path} fill="none" stroke="#0d6efd" strokeWidth="1.5" />
+                        {Array.from({ length: 5 }).map((_, index) => (
+                            <line
+                                key={index}
+                                x1="5"
+                                x2="95"
+                                y1={10 + index * 18}
+                                y2={10 + index * 18}
+                                stroke="#e2e8f0"
+                                strokeWidth="0.4"
+                            />
+                        ))}
+                        <path d={path} fill="none" stroke="#0d6efd" strokeWidth="1.6" strokeLinecap="round" />
                         {dots.map((point, idx) => (
                             <g key={idx}>
-                                <circle cx={`${point.left}%`} cy={`${point.top}%`} r="2" fill="#0d6efd" />
-                                <text x={`${point.left}%`} y={`${point.top - 4}%`} fontSize="2.5" fill="#102a43" textAnchor="middle">{Number(point.value).toLocaleString('vi-VN')}</text>
+                                <circle cx={point.x} cy={point.y} r="2.2" fill="#0d6efd" />
+                                <text x={point.x} y={point.y - 4} fontSize="2.8" fill="#0f172a" textAnchor="middle">
+                                    {Number(point.value).toLocaleString('vi-VN')}
+                                </text>
                             </g>
                         ))}
                     </svg>
@@ -274,7 +315,7 @@ const AdminDashboard = () => {
             <div style={timelineBarWrapper}>
                 {dots.map((point, idx) => (
                     <div key={idx} style={timelineBarColumn}>
-                        <div style={{ ...timelineBarFill, height: `${Math.max(6, point.value / maxValue * 100)}%` }} />
+                        <div style={{ ...timelineBarFill, height: `${Math.max(16, (point.value / maxValue) * 100)}%` }} />
                         <div style={timelineBarAmount}>{Number(point.value).toLocaleString('vi-VN')} đ</div>
                         <div style={timelineBarLabel}>{point.label}</div>
                     </div>
@@ -516,15 +557,6 @@ const AdminDashboard = () => {
         };
         return labels[status] || status;
     };
-
-    const topShowtimeCharts = (filteredRevenueByShowtime || [])
-        .slice()
-        .sort((a, b) => Number(b.revenue) - Number(a.revenue))
-        .slice(0, 6);
-
-    const maxShowtimeRevenue = topShowtimeCharts.length
-        ? Math.max(...topShowtimeCharts.map(item => Number(item.revenue) || 0))
-        : 1;
 
     return (
         <div style={{ padding: '30px', color: '#111', background: '#f7f9fc', minHeight: '100vh' }}>
@@ -1108,6 +1140,9 @@ const AdminDashboard = () => {
 
                             <section style={{ marginTop: '28px' }}>
                                 <h3>Biểu đồ doanh thu suất chiếu hàng đầu</h3>
+                                <div style={miniChartSection}>
+                                    {renderMiniRevenueChart(topShowtimeCharts, 'movie_title', 'revenue')}
+                                </div>
                                 <div style={chartSection}>
                                     {topShowtimeCharts.length === 0 && (
                                         <div style={{ color: '#aaa' }}>Không có dữ liệu để hiển thị biểu đồ.</div>
@@ -1134,6 +1169,9 @@ const AdminDashboard = () => {
 
                             <section style={{ marginTop: '28px' }}>
                                 <h3>Doanh thu theo suất chiếu</h3>
+                                <div style={miniChartSection}>
+                                    {renderMiniRevenueChart(topShowtimeCharts, 'movie_title', 'revenue')}
+                                </div>
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={tableStyle}>
                                         <thead>
@@ -1165,7 +1203,10 @@ const AdminDashboard = () => {
                             </section>
 
                             <section style={{ marginTop: '24px' }}>
-                                <h3>Doanh thu theo phòng chiếu</h3>
+                                <h3>Biểu đồ doanh thu theo phòng chiếu</h3>
+                                <div style={miniChartSection}>
+                                    {renderMiniRevenueChart(topTheaterCharts, 'theater_name', 'revenue')}
+                                </div>
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={tableStyle}>
                                         <thead>
@@ -1189,7 +1230,10 @@ const AdminDashboard = () => {
                             </section>
 
                             <section style={{ marginTop: '24px' }}>
-                                <h3>Doanh thu theo phim</h3>
+                                <h3>Biểu đồ doanh thu theo phim</h3>
+                                <div style={miniChartSection}>
+                                    {renderMiniRevenueChart(topMovieCharts, 'movie_title', 'revenue')}
+                                </div>
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={tableStyle}>
                                         <thead>
@@ -1258,6 +1302,12 @@ const timelineBarColumn = { display: 'flex', flexDirection: 'column', alignItems
 const timelineBarFill = { width: '100%', minHeight: '6%', background: '#0d6efd', borderRadius: '12px 12px 0 0', alignSelf: 'flex-end' };
 const timelineBarAmount = { color: '#102a43', fontSize: '12px', textAlign: 'center' };
 const timelineBarLabel = { color: '#475569', fontSize: '12px', textAlign: 'center' };
+const miniChartSection = { background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px', marginBottom: '16px' };
+const miniRevenueChartGrid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '16px', alignItems: 'end' };
+const miniRevenueColumn = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', minHeight: '150px' };
+const miniRevenueBar = { width: '100%', background: '#0d6efd', borderRadius: '12px 12px 0 0', transition: 'height 0.25s ease' };
+const miniRevenueValue = { fontSize: '12px', color: '#0f172a', textAlign: 'center' };
+const miniRevenueLabel = { fontSize: '12px', color: '#475569', textAlign: 'center', lineHeight: '1.3' };
 const quickFilterBtn = (active) => ({
     background: active ? '#0d6efd' : '#f8fafc',
     color: active ? 'white' : '#0d3b91',
