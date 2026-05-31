@@ -423,8 +423,8 @@ const AdminDashboard = () => {
         : 1;
 
     return (
-        <div style={{ padding: '30px', color: 'white' }}>
-            <div style={{ display: 'flex', marginBottom: '20px' }}>
+        <div style={{ padding: '30px', color: '#111', background: '#f7f9fc', minHeight: '100vh' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
                 <button onClick={() => setActiveTab('movies')} style={tabStyle(activeTab === 'movies')}>Quản Lý Phim</button>
                 <button onClick={() => setActiveTab('theaters')} style={tabStyle(activeTab === 'theaters')}>Quản Lý Phòng Chiếu</button>
                 <button onClick={() => setActiveTab('showtimes')} style={tabStyle(activeTab === 'showtimes')}>Quản Lý Suất Chiếu</button>
@@ -443,7 +443,7 @@ const AdminDashboard = () => {
                     </div>
                     <table style={tableStyle}>
                         <thead>
-                            <tr style={{ borderBottom: '1px solid #444' }}>
+                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                                 <th>ID</th>
                                 <th>Poster</th>
                                 <th>Tên phim</th>
@@ -453,7 +453,7 @@ const AdminDashboard = () => {
                         </thead>
                         <tbody>
                             {movies.map(m => (
-                                <tr key={m.id} style={{ borderBottom: '1px solid #333' }}>
+                                <tr key={m.id} style={{ borderBottom: '1px solid #cbd5e1' }}>
                                     <td>{m.id}</td>
                                     <td><img src={m.poster_url?.startsWith('http') ? m.poster_url : `${import.meta.env.VITE_API_BASE_URL}${m.poster_url}`} width="50" alt="" /></td>
                                     <td>{m.title}</td>
@@ -505,7 +505,7 @@ const AdminDashboard = () => {
                     </form>
                     <table style={tableStyle}>
                         <thead>
-                            <tr style={{ borderBottom: '1px solid #444' }}>
+                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                                 <th>ID</th>
                                 <th>Tên Phòng</th>
                                 <th>Sức chứa</th>
@@ -514,7 +514,7 @@ const AdminDashboard = () => {
                         </thead>
                         <tbody>
                             {theaters.map(t => (
-                                <tr key={t.id} style={{ borderBottom: '1px solid #333' }}>
+                                <tr key={t.id} style={{ borderBottom: '1px solid #cbd5e1' }}>
                                     <td>{t.id}</td>
                                     <td>{t.name}</td>
                                     <td>{t.capacity}</td>
@@ -641,7 +641,7 @@ const AdminDashboard = () => {
                     </form>
                     <table style={tableStyle}>
                         <thead>
-                            <tr style={{ borderBottom: '1px solid #444' }}>
+                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                                 <th>ID</th>
                                 <th>Phim</th>
                                 <th>Phòng</th>
@@ -654,7 +654,7 @@ const AdminDashboard = () => {
                         </thead>
                         <tbody>
                             {showtimes.map(s => (
-                                <tr key={s.id} style={{ borderBottom: '1px solid #333' }}>
+                                <tr key={s.id} style={{ borderBottom: '1px solid #cbd5e1' }}>
                                     <td>{s.id}</td>
                                     <td>{s.movie_title}</td>
                                     <td>{s.theater_name}</td>
@@ -730,22 +730,23 @@ const AdminDashboard = () => {
                         )}
                     </div>
                     <div style={{ 
-                        background: '#111',
-                        borderRadius: '10px',
+                        background: '#ffffff',
+                        borderRadius: '12px',
                         padding: '20px',
-                        marginTop: '20px'
+                        marginTop: '20px',
+                        boxShadow: '0 10px 30px rgba(15, 23, 42, 0.05)'
                     }}>
                         {/* Màn hình */}
                         <div style={{
                             width: '80%',
                             height: '40px',
-                            background: '#333',
+                            background: '#e2e8f0',
                             borderRadius: '20px',
                             margin: '0 auto 30px auto',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            color: '#666',
+                            color: '#0f172a',
                             fontWeight: 'bold'
                         }}>
                             MÀN HÌNH
@@ -782,8 +783,8 @@ const AdminDashboard = () => {
                                                 <div key={seat.id} style={{
                                                     padding: '8px 6px',
                                                     borderRadius: '4px',
-                                                    background: seat.is_booked ? '#661818' : '#163d14',
-                                                    color: 'white',
+                                                    background: seat.is_booked ? '#bfdbfe' : '#dbeafe',
+                                                    color: '#0f172a',
                                                     cursor: 'pointer',
                                                     textAlign: 'center',
                                                     fontSize: '11px',
@@ -792,7 +793,7 @@ const AdminDashboard = () => {
                                                     flexDirection: 'column',
                                                     justifyContent: 'center',
                                                     alignItems: 'center',
-                                                    border: '1px solid #333',
+                                                    border: '1px solid #cbd5e1',
                                                     transition: 'all 0.2s ease'
                                                 }} onClick={() => handleToggleSeat(seat)}>
                                                     <div style={{ fontWeight: 'bold', fontSize: '12px' }}>
@@ -828,7 +829,7 @@ const AdminDashboard = () => {
                     </div>
                     <table style={tableStyle}>
                         <thead>
-                            <tr style={{ borderBottom: '1px solid #444' }}>
+                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                                 <th>ID</th>
                                 <th>Người dùng</th>
                                 <th>Phim</th>
@@ -844,19 +845,19 @@ const AdminDashboard = () => {
                             {bookingFilter === 'all' ? (
                                 statusOrder.map(status => (
                                     <React.Fragment key={status}>
-                                        <tr style={{ background: '#111', color: '#fff' }}>
-                                            <td colSpan={9} style={{ padding: '14px 10px', fontWeight: 700, borderBottom: '1px solid #333' }}>
+                                        <tr style={{ background: '#f8fafc', color: '#0f172a' }}>
+                                            <td colSpan={9} style={{ padding: '14px 10px', fontWeight: 700, borderBottom: '1px solid #cbd5e1' }}>
                                                 {bookingStatusLabel(status)} ({bookingsByStatus[status]?.length || 0})
                                             </td>
                                         </tr>
                                         {bookingsByStatus[status]?.length === 0 ? (
-                                            <tr key={`${status}-empty`} style={{ borderBottom: '1px solid #333' }}>
-                                                <td colSpan={9} style={{ padding: '14px 10px', color: '#aaa' }}>
+                                            <tr key={`${status}-empty`} style={{ borderBottom: '1px solid #cbd5e1' }}>
+                                                <td colSpan={9} style={{ padding: '14px 10px', color: '#64748b' }}>
                                                     Không có vé {bookingStatusLabel(status).toLowerCase()}.
                                                 </td>
                                             </tr>
                                         ) : bookingsByStatus[status].map(b => (
-                                            <tr key={b.id} style={{ borderBottom: '1px solid #333' }}>
+                                            <tr key={b.id} style={{ borderBottom: '1px solid #cbd5e1' }}>
                                                 <td>{b.id}</td>
                                                 <td>{b.username}</td>
                                                 <td>{b.movie_title}</td>
@@ -878,14 +879,14 @@ const AdminDashboard = () => {
                                     </React.Fragment>
                                 ))
                             ) : filteredBookings.length === 0 ? (
-                                <tr style={{ borderBottom: '1px solid #333' }}>
-                                    <td colSpan={9} style={{ padding: '14px 10px', color: '#aaa' }}>
+                                <tr style={{ borderBottom: '1px solid #cbd5e1' }}>
+                                    <td colSpan={9} style={{ padding: '14px 10px', color: '#64748b' }}>
                                         Không có vé phù hợp với bộ lọc.
                                     </td>
                                 </tr>
                             ) : (
                                 filteredBookings.map(b => (
-                                    <tr key={b.id} style={{ borderBottom: '1px solid #333' }}>
+                                    <tr key={b.id} style={{ borderBottom: '1px solid #cbd5e1' }}>
                                         <td>{b.id}</td>
                                         <td>{b.username}</td>
                                         <td>{b.movie_title}</td>
@@ -995,7 +996,7 @@ const AdminDashboard = () => {
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={tableStyle}>
                                         <thead>
-                                            <tr style={{ borderBottom: '1px solid #444' }}>
+                                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                                                 <th>Suất chiếu</th>
                                                 <th>Phim</th>
                                                 <th>Phòng</th>
@@ -1027,7 +1028,7 @@ const AdminDashboard = () => {
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={tableStyle}>
                                         <thead>
-                                            <tr style={{ borderBottom: '1px solid #444' }}>
+                                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                                                 <th>Rạp</th>
                                                 <th>Doanh thu</th>
                                                 <th>Số vé</th>
@@ -1051,7 +1052,7 @@ const AdminDashboard = () => {
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={tableStyle}>
                                         <thead>
-                                            <tr style={{ borderBottom: '1px solid #444' }}>
+                                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                                                 <th>Phim</th>
                                                 <th>Doanh thu</th>
                                                 <th>Số vé</th>
@@ -1078,43 +1079,43 @@ const AdminDashboard = () => {
 };
 
 // CSS inline đơn giản
-const tableStyle = { width: '100%', borderCollapse: 'collapse', textAlign: 'left', background: '#1a1a1a', padding: '10px' };
-const btnThêm = { background: '#e50914', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' };
+const tableStyle = { width: '100%', borderCollapse: 'collapse', textAlign: 'left', background: '#ffffff', padding: '10px', border: '1px solid #e2e8f0' };
+const btnThêm = { background: '#0d6efd', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', boxShadow: '0 6px 16px rgba(13, 110, 253, 0.15)' };
 const tabStyle = (active) => ({
-    background: active ? '#e50914' : '#333',
-    color: 'white',
+    background: active ? '#0d6efd' : '#eff6ff',
+    color: active ? 'white' : '#0d3b91',
     padding: '10px 20px',
-    border: 'none',
-    borderRadius: '5px',
+    border: '1px solid #cfe2ff',
+    borderRadius: '8px',
     cursor: 'pointer',
     marginRight: '10px'
 });
-const inputStyle = { width: '100%', padding: '12px', margin: '10px 0', background: '#111', color: 'white', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' };
-const statCard = { background: '#111', border: '1px solid #333', borderRadius: '10px', padding: '16px', minWidth: '220px', width: '100%' };
-const statLabel = { color: '#bbb', marginBottom: '8px', fontSize: '13px' };
-const filterInput = { width: '100%', padding: '10px', background: '#111', color: 'white', border: '1px solid #444', borderRadius: '6px' };
-const buttonPrimary = { background: '#e50914', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer' };
-const metricCard = { background: '#111', border: '1px solid #333', borderRadius: '12px', padding: '18px', minHeight: '110px' };
-const metricTitle = { color: '#aaa', marginBottom: '12px', fontSize: '14px' };
-const metricValue = { color: 'white', fontSize: '24px', fontWeight: '700' };
+const inputStyle = { width: '100%', padding: '12px', margin: '10px 0', background: '#ffffff', color: '#111', border: '1px solid #cbd5e1', borderRadius: '8px', boxSizing: 'border-box' };
+const statCard = { background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px', minWidth: '220px', width: '100%', boxShadow: '0 4px 16px rgba(15, 23, 42, 0.05)' };
+const statLabel = { color: '#475569', marginBottom: '8px', fontSize: '13px' };
+const filterInput = { width: '100%', padding: '10px', background: '#ffffff', color: '#111', border: '1px solid #cbd5e1', borderRadius: '8px' };
+const buttonPrimary = { background: '#0d6efd', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', boxShadow: '0 6px 16px rgba(13, 110, 253, 0.15)' };
+const metricCard = { background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '20px', minHeight: '110px', boxShadow: '0 6px 18px rgba(15, 23, 42, 0.04)' };
+const metricTitle = { color: '#475569', marginBottom: '12px', fontSize: '14px' };
+const metricValue = { color: '#0d6efd', fontSize: '24px', fontWeight: '700' };
 const chartSection = { display: 'grid', gap: '14px', marginTop: '18px' };
-const chartRow = { display: 'grid', gridTemplateColumns: 'minmax(220px, 1.5fr) 2.5fr auto', gap: '12px', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid #2c2c2c' };
-const chartLabel = { display: 'flex', flexDirection: 'column', gap: '4px', color: 'white' };
-const chartSmallLabel = { color: '#777', fontSize: '12px' };
-const chartBarBackground = { background: '#111', border: '1px solid #333', borderRadius: '999px', height: '16px', width: '100%', overflow: 'hidden' };
-const chartBar = { height: '100%', borderRadius: '999px', background: '#e50914' };
-const chartValue = { color: 'white', fontSize: '13px', textAlign: 'right' };
-const tableRow = { borderBottom: '1px solid #333' };
-const tableCell = { padding: '12px 10px' };
+const chartRow = { display: 'grid', gridTemplateColumns: 'minmax(220px, 1.5fr) 2.5fr auto', gap: '12px', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid #e2e8f0' };
+const chartLabel = { display: 'flex', flexDirection: 'column', gap: '4px', color: '#102a43' };
+const chartSmallLabel = { color: '#64748b', fontSize: '12px' };
+const chartBarBackground = { background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '999px', height: '16px', width: '100%', overflow: 'hidden' };
+const chartBar = { height: '100%', borderRadius: '999px', background: '#0d6efd' };
+const chartValue = { color: '#102a43', fontSize: '13px', textAlign: 'right' };
+const tableRow = { borderBottom: '1px solid #e2e8f0' };
+const tableCell = { padding: '12px 10px', color: '#102a43' };
 const bookingFilterRow = { display: 'flex', flexWrap: 'wrap', gap: '10px', margin: '18px 0' };
-const bookingFilterChip = { border: '1px solid #444', background: '#111', color: '#ddd', padding: '10px 16px', borderRadius: '999px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s ease' };
-const bookingFilterChipActive = { background: '#e50914', color: '#fff', borderColor: '#e50914' };
+const bookingFilterChip = { border: '1px solid #cbd5e1', background: '#eff6ff', color: '#0d3b91', padding: '10px 16px', borderRadius: '999px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s ease' };
+const bookingFilterChipActive = { background: '#0d6efd', color: '#fff', borderColor: '#0d6efd' };
 const adminFieldStyle = { display: 'block', marginBottom: '10px' };
-const adminLabelStyle = { display: 'block', marginBottom: '4px', color: '#ddd', fontSize: '13px', fontWeight: 600 };
-const showtimeHintStyle = { color: '#aaa', fontSize: '13px', margin: '-2px 0 16px' };
-const formStyle = { marginBottom: '20px', padding: '20px', background: '#111', borderRadius: '10px' };
+const adminLabelStyle = { display: 'block', marginBottom: '4px', color: '#334155', fontSize: '13px', fontWeight: 600 };
+const showtimeHintStyle = { color: '#64748b', fontSize: '13px', margin: '-2px 0 16px' };
+const formStyle = { marginBottom: '20px', padding: '20px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15, 23, 42, 0.04)' };
 const formRow = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' };
-const cancelBtn = { background: '#444', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '5px', cursor: 'pointer' };
+const cancelBtn = { background: '#64748b', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '5px', cursor: 'pointer' };
 const smallConfirmBtn = { background: '#16a34a', color: 'white', padding: '6px 10px', border: 'none', borderRadius: '4px', cursor: 'pointer', marginRight: '8px' };
 const smallCancelBtn = { background: '#d32f2f', color: 'white', padding: '6px 10px', border: 'none', borderRadius: '4px', cursor: 'pointer' };
 
