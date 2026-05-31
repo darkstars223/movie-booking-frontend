@@ -180,7 +180,7 @@ const AdminDashboard = () => {
         } finally {
             setStatsLoading(false);
         }
-    }, [statsFilter.from_date, statsFilter.to_date]);
+    }, [statsFilter]);
 
     const fetchSeats = async (showtimeId) => {
         if (!showtimeId) return;
