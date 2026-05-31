@@ -110,6 +110,9 @@ const AdminDashboard = () => {
     const [statistics, setStatistics] = useState(null);
     const [statsLoading, setStatsLoading] = useState(false);
     const [statsFilter, setStatsFilter] = useState({ from_date: '', to_date: '' });
+    const [chartType, setChartType] = useState('line');
+    const [quickRange, setQuickRange] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
     const [theaterForm, setTheaterForm] = useState({ name: '', capacity: '' });
     const [editingTheater, setEditingTheater] = useState(null);
     const [showtimeForm, setShowtimeForm] = useState({ movie_id: '', theater_id: '', room_name: '', show_date: '', start_time: '', price: '' });
@@ -138,12 +141,37 @@ const AdminDashboard = () => {
         api.get('/admin/bookings').then(res => setBookings(res.data));
     };
 
-    const fetchStatistics = useCallback(async () => {
+    const formatDateInput = (date) => {
+        if (!(date instanceof Date)) return '';
+        return date.toISOString().slice(0, 10);
+    };
+
+    const getQuickRangeDates = (range) => {
+        const now = new Date();
+        const to = new Date(now);
+        const from = new Date(now);
+
+        if (range === 'day') {
+            // chỉ ngày hiện tại
+        } else if (range === 'week') {
+            from.setDate(to.getDate() - 6);
+        } else if (range === 'month') {
+            from.setMonth(to.getMonth() - 1);
+        }
+
+        return {
+            from_date: formatDateInput(from),
+            to_date: formatDateInput(to)
+        };
+    };
+
+    const fetchStatistics = useCallback(async (overrideFilter = null) => {
         try {
             setStatsLoading(true);
             const params = {};
-            if (statsFilter.from_date) params.from_date = statsFilter.from_date;
-            if (statsFilter.to_date) params.to_date = statsFilter.to_date;
+            const filter = overrideFilter || statsFilter;
+            if (filter.from_date) params.from_date = filter.from_date;
+            if (filter.to_date) params.to_date = filter.to_date;
             const res = await api.get('/admin/statistics', { params });
             setStatistics(res.data);
         } catch (err) {
@@ -165,6 +193,24 @@ const AdminDashboard = () => {
         }
     };
 
+    const applyQuickRange = (range) => {
+        const nextFilter = getQuickRangeDates(range);
+        setStatsFilter(nextFilter);
+        setQuickRange(range);
+        fetchStatistics(nextFilter);
+    };
+
+    const filterRevenueRows = (items = []) => {
+        const query = searchTerm.trim().toLowerCase();
+        if (!query) return items;
+
+        return items.filter(item => {
+            const title = String(item.movie_title || item.theater_name || '').toLowerCase();
+            const count = String(item.tickets_sold || item.orders || '').toLowerCase();
+            return title.includes(query) || count.includes(query);
+        });
+    };
+
     const selectedShowtimeMovie = movies.find(movie => String(movie.id) === String(showtimeForm.movie_id));
     const showtimeStartPreview = buildDateTimeValue(showtimeForm.show_date, showtimeForm.start_time);
     const statusOrder = ['pending', 'confirmed', 'expired', 'cancel'];
@@ -179,6 +225,63 @@ const AdminDashboard = () => {
     }, {});
     const filteredBookings = bookingFilter === 'all' ? sortedBookings : bookingsByStatus[bookingFilter] || [];
     const showtimeEndPreview = addMinutesToDateTimeValue(showtimeStartPreview, selectedShowtimeMovie?.duration);
+
+    const revenueTimeline = statistics?.revenue_by_date || [];
+    const filteredRevenueByMovie = filterRevenueRows(statistics?.revenue_by_movie || []);
+    const filteredRevenueByShowtime = filterRevenueRows(statistics?.revenue_by_showtime || []);
+    const totalTimelineRevenue = revenueTimeline.reduce((sum, item) => sum + Number(item.revenue || 0), 0);
+    const totalTimelineOrders = revenueTimeline.reduce((sum, item) => sum + Number(item.orders || 0), 0);
+
+    const renderTimelineChart = () => {
+        if (!revenueTimeline.length) {
+            return <div style={{ color: '#64748b', padding: '20px 0' }}>Không có dữ liệu timeline để hiển thị.</div>;
+        }
+
+        const maxValue = Math.max(...revenueTimeline.map(item => Number(item.revenue || 0)), 1);
+        const xCount = revenueTimeline.length;
+        const labels = revenueTimeline.map(item => item.date);
+        const dots = revenueTimeline.map((item, index) => {
+            const value = Number(item.revenue || 0);
+            const left = xCount === 1 ? 50 : (index / (xCount - 1)) * 100;
+            const heightRatio = value / maxValue;
+            const top = 100 - heightRatio * 100;
+            return { left, top, value, label: item.date };
+        });
+
+        if (chartType === 'line') {
+            const path = dots.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.left},${point.top}`).join(' ');
+            return (
+                <div style={timelineChartWrapper}>
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={timelineSvg}>
+                        <path d={path} fill="none" stroke="#0d6efd" strokeWidth="1.5" />
+                        {dots.map((point, idx) => (
+                            <g key={idx}>
+                                <circle cx={`${point.left}%`} cy={`${point.top}%`} r="2" fill="#0d6efd" />
+                                <text x={`${point.left}%`} y={`${point.top - 4}%`} fontSize="2.5" fill="#102a43" textAnchor="middle">{Number(point.value).toLocaleString('vi-VN')}</text>
+                            </g>
+                        ))}
+                    </svg>
+                    <div style={timelineLabels}>
+                        {labels.map((label, idx) => (
+                            <div key={idx} style={timelineLabel}>{label}</div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div style={timelineBarWrapper}>
+                {dots.map((point, idx) => (
+                    <div key={idx} style={timelineBarColumn}>
+                        <div style={{ ...timelineBarFill, height: `${Math.max(6, point.value / maxValue * 100)}%` }} />
+                        <div style={timelineBarAmount}>{Number(point.value).toLocaleString('vi-VN')} đ</div>
+                        <div style={timelineBarLabel}>{point.label}</div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
 
     useEffect(() => {
         if (user?.role !== 'admin') {
@@ -414,7 +517,7 @@ const AdminDashboard = () => {
         return labels[status] || status;
     };
 
-    const topShowtimeCharts = (statistics?.revenue_by_showtime || [])
+    const topShowtimeCharts = (filteredRevenueByShowtime || [])
         .slice()
         .sort((a, b) => Number(b.revenue) - Number(a.revenue))
         .slice(0, 6);
@@ -915,7 +1018,7 @@ const AdminDashboard = () => {
             {activeTab === 'statistics' && (
                 <div>
                     <h2>Thống Kê Doanh Thu</h2>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginTop: '20px' }}>
                         <div style={statCard}>
                             <div style={statLabel}>Từ ngày</div>
                             <input
@@ -934,8 +1037,30 @@ const AdminDashboard = () => {
                                 style={filterInput}
                             />
                         </div>
+                        <div style={statCard}>
+                            <div style={statLabel}>Dạng biểu đồ</div>
+                            <select value={chartType} onChange={e => setChartType(e.target.value)} style={filterInput}>
+                                <option value="line">Dạng đường kẻ</option>
+                                <option value="bar">Dạng cột</option>
+                            </select>
+                        </div>
+                        <div style={statCard}>
+                            <div style={statLabel}>Tìm phim / số vé</div>
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                placeholder="Nhập tên phim hoặc số vé"
+                                style={filterInput}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
+                            <button onClick={() => applyQuickRange('day')} style={quickFilterBtn(quickRange === 'day')}>Trong ngày</button>
+                            <button onClick={() => applyQuickRange('week')} style={quickFilterBtn(quickRange === 'week')}>Tuần</button>
+                            <button onClick={() => applyQuickRange('month')} style={quickFilterBtn(quickRange === 'month')}>Tháng</button>
+                        </div>
                         <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                            <button onClick={fetchStatistics} style={buttonPrimary}>Làm mới</button>
+                            <button onClick={() => fetchStatistics()} style={buttonPrimary}>Làm mới</button>
                         </div>
                     </div>
 
@@ -949,7 +1074,7 @@ const AdminDashboard = () => {
                                     <div style={metricValue}>{statistics.total_revenue?.toLocaleString('vi-VN')} đ</div>
                                 </div>
                                 <div style={metricCard}>
-                                    <div style={metricTitle}>Vé đã bán</div>
+                                    <div style={metricTitle}>Số đơn hàng</div>
                                     <div style={metricValue}>{statistics.tickets_sold}</div>
                                 </div>
                                 <div style={metricCard}>
@@ -969,6 +1094,17 @@ const AdminDashboard = () => {
                                     <div style={metricValue}>{statistics.average_ticket_value?.toLocaleString('vi-VN')} đ</div>
                                 </div>
                             </div>
+
+                            <section style={{ marginTop: '28px' }}>
+                                <h3>Biểu đồ doanh thu theo mốc thời gian</h3>
+                                <div style={chartIntroRow}>
+                                    <span style={chartSummary}>Tổng doanh thu: <strong>{totalTimelineRevenue.toLocaleString('vi-VN')} đ</strong></span>
+                                    <span style={chartSummary}>Tổng đơn hàng: <strong>{totalTimelineOrders}</strong></span>
+                                </div>
+                                <div style={timelineChartCard}>
+                                    {renderTimelineChart()}
+                                </div>
+                            </section>
 
                             <section style={{ marginTop: '28px' }}>
                                 <h3>Biểu đồ doanh thu suất chiếu hàng đầu</h3>
@@ -1012,7 +1148,7 @@ const AdminDashboard = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {statistics.revenue_by_showtime.map(item => (
+                                            {filteredRevenueByShowtime.map(item => (
                                                 <tr key={item.showtime_id} style={tableRow}>
                                                     <td style={tableCell}>{item.showtime_id}</td>
                                                     <td style={tableCell}>{item.movie_title}</td>
@@ -1064,7 +1200,7 @@ const AdminDashboard = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {statistics.revenue_by_movie.map(item => (
+                                            {filteredRevenueByMovie.map(item => (
                                                 <tr key={item.movie_id} style={tableRow}>
                                                     <td style={tableCell}>{item.movie_title}</td>
                                                     <td style={tableCell}>{Number(item.revenue).toLocaleString('vi-VN')} đ</td>
@@ -1110,6 +1246,27 @@ const chartSmallLabel = { color: '#64748b', fontSize: '12px' };
 const chartBarBackground = { background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '999px', height: '16px', width: '100%', overflow: 'hidden' };
 const chartBar = { height: '100%', borderRadius: '999px', background: '#0d6efd' };
 const chartValue = { color: '#102a43', fontSize: '13px', textAlign: 'right' };
+const chartIntroRow = { display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', marginBottom: '16px', color: '#334155' };
+const chartSummary = { display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '999px', padding: '10px 14px', color: '#0f172a' };
+const timelineChartCard = { background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px', boxShadow: '0 6px 18px rgba(15, 23, 42, 0.05)' };
+const timelineChartWrapper = { width: '100%', minHeight: '240px', position: 'relative' };
+const timelineSvg = { width: '100%', height: '260px', overflow: 'visible' };
+const timelineLabels = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '8px', marginTop: '14px' };
+const timelineLabel = { color: '#64748b', fontSize: '12px', textAlign: 'center' };
+const timelineBarWrapper = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))', gap: '18px', alignItems: 'flex-end', minHeight: '220px' };
+const timelineBarColumn = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' };
+const timelineBarFill = { width: '100%', minHeight: '6%', background: '#0d6efd', borderRadius: '12px 12px 0 0', alignSelf: 'flex-end' };
+const timelineBarAmount = { color: '#102a43', fontSize: '12px', textAlign: 'center' };
+const timelineBarLabel = { color: '#475569', fontSize: '12px', textAlign: 'center' };
+const quickFilterBtn = (active) => ({
+    background: active ? '#0d6efd' : '#f8fafc',
+    color: active ? 'white' : '#0d3b91',
+    border: active ? '1px solid #0d6efd' : '1px solid #cbd5e1',
+    borderRadius: '8px',
+    padding: '10px 16px',
+    cursor: 'pointer',
+    minWidth: '110px'
+});
 const tableRow = { borderBottom: '1px solid #e2e8f0' };
 const tableCell = { padding: '12px 10px', color: '#102a43' };
 const bookingFilterRow = { display: 'flex', flexWrap: 'wrap', gap: '10px', margin: '18px 0' };
