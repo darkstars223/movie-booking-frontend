@@ -297,31 +297,46 @@ const AdminDashboard = () => {
         });
 
         if (chartType === 'line') {
-            const path = dots.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x},${point.y}`).join(' ');
+            // Dùng viewBox ngang cố định để SVG fill đầy container
+            const W = 1000, H = 260, PAD_L = 60, PAD_R = 30, PAD_T = 20, PAD_B = 40;
+            const chartW = W - PAD_L - PAD_R;
+            const chartH = H - PAD_T - PAD_B;
+            const scaledDots = revenueTimeline.map((item, index) => {
+                const value = Number(item.revenue || 0);
+                const x = PAD_L + (xCount === 1 ? chartW / 2 : (index / (xCount - 1)) * chartW);
+                const y = PAD_T + chartH - (value / maxValue) * chartH;
+                return { x, y, value, label: formatChartDate(item.date) };
+            });
+            const linePath = scaledDots.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x},${p.y}`).join(' ');
+            // Y-axis grid lines + labels
+            const gridLines = Array.from({ length: 5 }, (_, i) => {
+                const frac = i / 4;
+                const yPos = PAD_T + chartH * frac;
+                const val = maxValue * (1 - frac);
+                return { yPos, val };
+            });
             return (
-                <div style={timelineChartWrapper}>
-                    <svg viewBox="0 0 100 100" preserveAspectRatio="xMinYMin meet" style={timelineSvg}>
-                        {Array.from({ length: 5 }).map((_, index) => (
-                            <line
-                                key={index}
-                                x1="5"
-                                x2="95"
-                                y1={15 + index * 17}
-                                y2={15 + index * 17}
-                                stroke="#e2e8f0"
-                                strokeWidth="0.4"
-                            />
+                <div style={{ ...timelineChartWrapper, padding: 0 }}>
+                    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: '100%', display: 'block', overflow: 'visible' }}>
+                        {/* Grid lines + Y labels */}
+                        {gridLines.map((g, i) => (
+                            <g key={i}>
+                                <line x1={PAD_L} x2={W - PAD_R} y1={g.yPos} y2={g.yPos} stroke="#e2e8f0" strokeWidth="1" />
+                                <text x={PAD_L - 8} y={g.yPos + 4} textAnchor="end" fontSize="20" fill="#94a3b8">
+                                    {g.val >= 1000 ? `${Math.round(g.val/1000)}k` : Math.round(g.val)}
+                                </text>
+                            </g>
                         ))}
-                        <path d={path} fill="none" stroke="#0d6efd" strokeWidth="1.4" strokeLinecap="round" />
-                        {dots.map((point, idx) => (
-                            <circle key={idx} cx={point.x} cy={point.y} r="2.2" fill="#0d6efd" />
+                        {/* Line */}
+                        <path d={linePath} fill="none" stroke="#0d6efd" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                        {/* Dots + X labels */}
+                        {scaledDots.map((p, idx) => (
+                            <g key={idx}>
+                                <circle cx={p.x} cy={p.y} r="6" fill="#0d6efd" />
+                                <text x={p.x} y={H - 6} textAnchor="middle" fontSize="20" fill="#64748b">{p.label}</text>
+                            </g>
                         ))}
                     </svg>
-                    <div style={timelineLabels}>
-                        {labels.map((label, idx) => (
-                            <div key={idx} style={timelineLabel}>{label}</div>
-                        ))}
-                    </div>
                 </div>
             );
         }
