@@ -122,6 +122,7 @@ const AdminDashboard = () => {
     const [bookingFilter, setBookingFilter] = useState('all');
     const [seatsToAdd, setSeatsToAdd] = useState('');
     const [seatsToDelete, setSeatsToDelete] = useState('');
+    const [hoveredDot, setHoveredDot] = useState(null); // { idx, x, y, value, label }
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -347,7 +348,7 @@ const AdminDashboard = () => {
                             <g key={i}>
                                 <line x1={PAD_L} x2={W - PAD_R} y1={g.yPos} y2={g.yPos}
                                     stroke={i === 0 ? '#cbd5e1' : '#e2e8f0'} strokeWidth="1" strokeDasharray={i === 0 ? 'none' : '4 3'} />
-                                <text x={PAD_L - 10} y={g.yPos + 5} textAnchor="end" fontSize="18" fill="#94a3b8">{g.label}</text>
+                                <text x={PAD_L - 10} y={g.yPos + 5} textAnchor="end" fontSize="11" fill="#94a3b8">{g.label}</text>
                             </g>
                         ))}
                         {/* Baseline */}
@@ -356,20 +357,48 @@ const AdminDashboard = () => {
                         <path d={areaPath} fill="url(#areaGrad)" />
                         {/* Line */}
                         <path d={linePath} fill="none" stroke="#0d6efd" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                        {/* Dots + tooltip value + X label */}
+                        {/* Dots + X label (no always-visible value) */}
                         {scaledDots.map((p, idx) => (
-                            <g key={idx}>
-                                <circle cx={p.x} cy={p.y} r="5" fill="#fff" stroke="#0d6efd" strokeWidth="2.5" />
-                                <text x={p.x} y={p.y - 12} textAnchor="middle" fontSize="17" fill="#0d6efd" fontWeight="600">
-                                    {p.value >= 1000000
-                                        ? (p.value / 1000000).toFixed(1) + 'M'
-                                        : p.value >= 1000
-                                            ? Math.round(p.value / 1000) + 'k'
-                                            : p.value.toString()}
-                                </text>
-                                <text x={p.x} y={H - 8} textAnchor="middle" fontSize="18" fill="#64748b">{p.label}</text>
+                            <g key={idx}
+                                onMouseEnter={() => setHoveredDot({ idx, x: p.x, y: p.y, value: p.value, label: p.label })}
+                                onMouseLeave={() => setHoveredDot(null)}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                {/* Vùng hit area rộng hơn để dễ hover */}
+                                <circle cx={p.x} cy={p.y} r="14" fill="transparent" />
+                                <circle cx={p.x} cy={p.y} r={hoveredDot?.idx === idx ? 7 : 5}
+                                    fill="#fff" stroke="#0d6efd"
+                                    strokeWidth={hoveredDot?.idx === idx ? 3 : 2.5}
+                                    style={{ transition: 'r 0.15s ease' }}
+                                />
+                                <text x={p.x} y={H - 10} textAnchor="middle" fontSize="11" fill="#64748b">{p.label}</text>
                             </g>
                         ))}
+                        {/* Tooltip khi hover */}
+                        {hoveredDot && (() => {
+                            const TW = 130, TH = 44, TR = 6;
+                            const tx = Math.min(Math.max(hoveredDot.x - TW / 2, PAD_L), W - PAD_R - TW);
+                            const ty = hoveredDot.y - TH - 12;
+                            const formattedVal = hoveredDot.value >= 1000000
+                                ? (hoveredDot.value / 1000000).toFixed(2) + 'M đ'
+                                : hoveredDot.value >= 1000
+                                    ? Math.round(hoveredDot.value / 1000) + 'k đ'
+                                    : hoveredDot.value.toLocaleString('vi-VN') + ' đ';
+                            return (
+                                <g pointerEvents="none">
+                                    {/* Shadow */}
+                                    <rect x={tx + 2} y={ty + 2} width={TW} height={TH} rx={TR} fill="rgba(0,0,0,0.12)" />
+                                    {/* Box */}
+                                    <rect x={tx} y={ty} width={TW} height={TH} rx={TR} fill="#1e293b" />
+                                    {/* Arrow */}
+                                    <polygon points={`${hoveredDot.x - 6},${ty + TH} ${hoveredDot.x + 6},${ty + TH} ${hoveredDot.x},${ty + TH + 8}`} fill="#1e293b" />
+                                    {/* Date */}
+                                    <text x={tx + TW / 2} y={ty + 16} textAnchor="middle" fontSize="11" fill="#94a3b8">{hoveredDot.label}</text>
+                                    {/* Value */}
+                                    <text x={tx + TW / 2} y={ty + 33} textAnchor="middle" fontSize="12" fontWeight="700" fill="#60a5fa">{formattedVal}</text>
+                                </g>
+                            );
+                        })()}
                     </svg>
                 </div>
             );
