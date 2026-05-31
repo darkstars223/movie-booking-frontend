@@ -288,7 +288,6 @@ const AdminDashboard = () => {
             // fallback: take first 10 chars YYYY-MM-DD
             return String(dateStr).slice(0, 10);
         };
-        const labels = revenueTimeline.map(item => formatChartDate(item.date));
         const dots = revenueTimeline.map((item, index) => {
             const value = Number(item.revenue || 0);
             const x = xCount === 1 ? 50 : 5 + (index / (xCount - 1)) * 90;
@@ -1324,9 +1323,6 @@ const chartIntroRow = { display: 'flex', flexWrap: 'wrap', gap: '10px', alignIte
 const chartSummary = { display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '999px', padding: '10px 14px', color: '#0f172a' };
 const timelineChartCard = { background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px', boxShadow: '0 6px 18px rgba(15, 23, 42, 0.05)' };
 const timelineChartWrapper = { width: '100%', minHeight: '240px', position: 'relative', boxSizing: 'border-box', padding: '0 8px' };
-const timelineSvg = { width: '100%', height: '240px', overflow: 'visible', display: 'block' };
-const timelineLabels = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '8px', marginTop: '12px', alignItems: 'center', justifyItems: 'center' };
-const timelineLabel = { color: '#64748b', fontSize: '12px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' };
 const timelineBarWrapper = { display: 'flex', flexWrap: 'wrap', gap: '18px', alignItems: 'flex-end', minHeight: '260px' };
 const timelineBarColumn = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' };
 const timelineBarFill = { width: '48px', minHeight: '6px', background: '#0d6efd', borderRadius: '12px 12px 0 0' };
