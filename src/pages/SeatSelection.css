@@ -69,6 +69,7 @@
 .legend-dot.available { background: #fff; border: 2px solid #ddd; }
 .legend-dot.selected { background: #e50914; }
 .legend-dot.booked { background: #e0e0e0; border: 1px dashed #bbb; }
+.legend-dot.vip { background: linear-gradient(180deg,#ffd27a,#ffb84d); border: 1px solid #e6a800; }
 
 /* Seats Layout */
 .seats-layout-wrapper {
@@ -113,6 +114,17 @@
     color: #444 !important; /* Chữ số ghế hiện rõ */
     cursor: pointer;
     transition: all 0.2s;
+}
+
+.seat-box.vip {
+    border-color: #e6a800;
+    box-shadow: 0 2px 6px rgba(230,168,0,0.08);
+}
+
+.seat-box.vip.selected {
+    background: linear-gradient(180deg,#ffb84d,#e69400) !important;
+    border-color: #d97800 !important;
+    color: #fff !important;
 }
 
 .seat-box:hover:not(.booked) {

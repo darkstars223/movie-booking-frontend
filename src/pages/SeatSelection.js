@@ -87,7 +87,13 @@ const SeatSelection = () => {
     };
 
     const groupedSeats = groupSeatsByRow(seats);
-    const totalPrice = selectedSeats.length * (showtimeInfo?.price || 0);
+    const totalPrice = selectedSeats.reduce((acc, s) => {
+        const base = Number(showtimeInfo?.price || 0);
+        const multiplier = s.is_vip ? 1.1 : 1.0; // VIP +10%
+        return acc + base * multiplier;
+    }, 0);
+    const vipCount = selectedSeats.filter(s => s.is_vip).length;
+    const regularCount = selectedSeats.length - vipCount;
 
     return (
         <div className="seat-selection-container">
@@ -130,8 +136,9 @@ const SeatSelection = () => {
                             {groupedSeats[rowLabel].map(seat => (
                                 <div
                                     key={seat.id}
-                                    className={`seat-box ${seat.is_booked ? 'booked' : ''} ${selectedSeats.find(s => s.id === seat.id) ? 'selected' : ''}${isShowtimePast ? ' disabled' : ''}`}
+                                    className={`seat-box ${seat.is_booked ? 'booked' : ''} ${seat.is_vip ? 'vip' : ''} ${selectedSeats.find(s => s.id === seat.id) ? 'selected' : ''}${isShowtimePast ? ' disabled' : ''}`}
                                     onClick={() => !isShowtimePast && toggleSeat(seat)}
+                                    title={seat.is_vip ? 'VIP (+10%)' : ''}
                                 >
                                     {seat.seat_number.substring(1)}
                                 </div>
