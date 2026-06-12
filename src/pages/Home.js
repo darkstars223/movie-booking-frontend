@@ -20,7 +20,6 @@ const isSameDate = (value, date) => {
 
 const Home = () => {
   const [moviesNowShowing, setMoviesNowShowing] = useState([]);
-  const [banners, setBanners] = useState([]);
   const [moviesUpcoming, setMoviesUpcoming] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -74,9 +73,6 @@ const Home = () => {
       });
 
       setMoviesNowShowing(nowShowing.slice(0, 8));
-      // Use first 5 now-showing movies as banners (or fallback to upcoming)
-      const featured = (nowShowing.length ? nowShowing : upcoming).slice(0, 5).map(m => ({ id: m.id, poster: m.poster_url, title: m.title }));
-      setBanners(featured);
       setMoviesUpcoming(upcoming.slice(0, 8));
     } catch (err) {
       console.error('Loi fetch phim:', err);
@@ -92,8 +88,7 @@ const Home = () => {
 
   return (
     <div style={styles.container}>
-      {/* Banner carousel */}
-      {banners && banners.length > 0 && <BannerCarousel items={banners} />}
+      {/* Banner removed per request */}
       <section style={styles.section}>
         <div style={styles.sectionHeader}>
           <h2 style={styles.sectionTitle}>Phim Đang Chiếu Hôm Nay</h2>
@@ -220,39 +215,7 @@ const MovieCard = ({ movie, onBooking, isUpcoming }) => {
   );
 };
 
-const BannerCarousel = ({ items = [] }) => {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => {
-      setIdx(i => (i + 1) % items.length);
-    }, 4500);
-    return () => clearInterval(t);
-  }, [items.length]);
 
-  if (!items.length) return null;
-
-  return (
-    <div style={styles.carouselWrap}>
-      <div style={styles.carouselInner}>
-        {items.map((it, i) => (
-          <div key={it.id} style={{ ...styles.carouselItem, opacity: i === idx ? 1 : 0, transform: i === idx ? 'scale(1)' : 'scale(0.98)' }}>
-            <Link to={`/movie/${it.id}`} style={{ display: 'block', height: '100%' }}>
-              <img src={it.poster?.startsWith('http') ? it.poster : `${import.meta.env.VITE_API_BASE_URL}${it.poster}`} alt={it.title} style={styles.carouselImg} />
-            </Link>
-            <div style={styles.carouselCaption}>{it.title}</div>
-          </div>
-        ))}
-      </div>
-      <div style={styles.carouselControls}>
-        <div style={styles.carouselDots}>
-          {items.map((_, i) => (
-            <button key={i} onClick={() => setIdx(i)} style={{ ...styles.dot, background: i === idx ? '#e50914' : 'rgba(255,255,255,0.5)' }} />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const styles = {
   container: {
@@ -419,76 +382,6 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.3s ease'
   }
-  ,
-  /* Carousel styles */
-  carouselWrap: {
-    width: '100%',
-    maxWidth: '1100px',
-    margin: '0 auto 40px',
-    position: 'relative',
-    overflow: 'hidden',
-    borderRadius: '8px',
-    background: '#111'
-  },
-
-  carouselInner: {
-    position: 'relative',
-    height: '420px'
-  },
-
-  carouselItem: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    transition: 'opacity 600ms ease, transform 600ms ease',
-    display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'center'
-  },
-
-  carouselImg: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    display: 'block'
-  },
-
-  carouselCaption: {
-    position: 'absolute',
-    left: '20px',
-    bottom: '18px',
-    color: '#fff',
-    fontSize: '20px',
-    fontWeight: '700',
-    textShadow: '0 4px 12px rgba(0,0,0,0.6)'
-  },
-
-  carouselControls: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: '10px',
-    display: 'flex',
-    justifyContent: 'center',
-    pointerEvents: 'none'
-  },
-
-  carouselDots: {
-    pointerEvents: 'auto',
-    display: 'flex',
-    gap: '8px'
-  },
-
-  dot: {
-    width: '12px',
-    height: '12px',
-    borderRadius: '50%',
-    border: 'none',
-    cursor: 'pointer',
-    padding: 0
-  },
 };
 
 export default Home;
