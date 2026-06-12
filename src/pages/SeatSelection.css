@@ -184,3 +184,138 @@
     color: #999 !important;
     cursor: not-allowed;
 }
+
+@media (max-width: 900px) {
+    .seat-selection-container {
+        padding: 30px 16px;
+        align-items: stretch;
+    }
+
+    .movie-header {
+        margin-bottom: 30px;
+    }
+
+    .movie-title {
+        font-size: 24px;
+    }
+
+    .movie-meta {
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .screen-container {
+        max-width: 100%;
+        margin-bottom: 32px;
+    }
+
+    .screen {
+        height: 5px;
+    }
+
+    .legend {
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .seats-layout-wrapper {
+        padding: 28px;
+    }
+
+    .seat-row {
+        gap: 10px;
+    }
+
+    .row-name {
+        width: 20px;
+        font-size: 12px;
+    }
+
+    .row-seats {
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+    }
+
+    .seat-box {
+        width: 32px;
+        height: 32px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 640px) {
+    .seat-selection-container {
+        padding: 20px 12px;
+    }
+
+    .seat-selection-container,
+    .screen-container,
+    .seats-layout-wrapper,
+    .booking-footer-card {
+        width: 100%;
+    }
+
+    .movie-title {
+        font-size: 20px;
+    }
+
+    .movie-meta {
+        font-size: 14px;
+        gap: 8px;
+    }
+
+    .legend {
+        gap: 10px;
+    }
+
+    .legend-item {
+        font-size: 13px;
+    }
+
+    .seats-layout-wrapper {
+        padding: 20px;
+    }
+
+    .seat-row {
+        flex-wrap: nowrap;
+        min-width: 0;
+    }
+
+    .row-name:last-child {
+        display: none;
+    }
+
+    .row-seats {
+        flex-wrap: nowrap;
+        min-width: 0;
+    }
+
+    .seat-box {
+        width: 30px;
+        height: 30px;
+        font-size: 10px;
+    }
+
+    .booking-footer-card {
+        padding: 20px;
+    }
+
+    .summary-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: flex-start;
+    }
+
+    .total-price-text {
+        font-size: 20px;
+    }
+
+    .btn-booking-confirm {
+        padding: 14px;
+        font-size: 15px;
+    }
+}
