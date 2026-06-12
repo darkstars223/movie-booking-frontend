@@ -1,5 +1,6 @@
-import React from 'react';
-import { Film, User, Search, LayoutDashboard, LogOut, Lock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Film, User, Search, LayoutDashboard, LogOut, Lock, Menu, X } from 'lucide-react';
+import './Header.css';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Header = () => {
@@ -14,54 +15,52 @@ const Header = () => {
     navigate('/login');
   };
 
-  return (
-    <nav style={navStyle}>
-      <Link to="/" style={logoStyle}>
-        <Film size={32} /> TTV CINEMA
-      </Link>
+  const [open, setOpen] = useState(false);
 
-      <div style={menuStyle}>
-        <Link to="/" style={navItemStyle}>Trang chủ</Link>
-        <Link to="/movies" style={navItemStyle}>Phim</Link>
-        {user && <Link to="/my-tickets" style={navItemStyle}>Vé của tôi</Link>}
+  return (
+    <nav className="site-nav">
+      <div className="nav-left">
+        <Link to="/" className="nav-logo">
+          <Film size={28} /> <span className="logo-text">TTV CINEMA</span>
+        </Link>
       </div>
 
-      <div style={actionStyle}>
-        <Search size={20} style={{ cursor: 'pointer' }} />
-        
-        {/* Chỉ hiện nút Quản trị nếu user có role là admin */}
+      <button className="nav-toggle" aria-label="Mở menu" onClick={() => setOpen(s => !s)}>
+        {open ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      <div className={`nav-center ${open ? 'open' : ''}`}>
+        <Link to="/" className="nav-item">Trang chủ</Link>
+        <Link to="/movies" className="nav-item">Phim</Link>
+        {user && <Link to="/my-tickets" className="nav-item">Vé của tôi</Link>}
+      </div>
+
+      <div className={`nav-right ${open ? 'open' : ''}`}>
+        <Search size={18} className="icon-btn" />
+
         {user?.role === 'admin' && (
-          <Link to="/admin" style={adminLinkStyle}>
-            <LayoutDashboard size={20} />
-            <span style={{ fontSize: '14px' }}>Quản trị</span>
+          <Link to="/admin" className="nav-item admin-link">
+            <LayoutDashboard size={18} />
+            <span>Quản trị</span>
           </Link>
         )}
 
         {user ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <span style={{ color: '#fff', fontSize: '14px' }}>Chào, {user.fullname}</span>
-            <Link to="/change-password" style={{ color: '#fbbf24', cursor: 'pointer' }} title="Thay đổi mật khẩu">
-              <Lock size={20} />
+          <div className="user-actions">
+            <span className="greeting">Chào, {user.fullname}</span>
+            <Link to="/change-password" className="icon-btn" title="Thay đổi mật khẩu">
+              <Lock size={18} />
             </Link>
-            <LogOut size={20} onClick={handleLogout} style={{ cursor: 'pointer', color: '#aaa' }} />
+            <button className="icon-btn" onClick={handleLogout} title="Đăng xuất"><LogOut size={18} /></button>
           </div>
         ) : (
-          <Link to="/login" style={loginBtnStyle}>
-            <User size={20} /> Đăng nhập
+          <Link to="/login" className="login-btn">
+            <User size={16} /> Đăng nhập
           </Link>
         )}
       </div>
     </nav>
   );
 };
-
-// Styles (Có thể tách ra file CSS riêng)
-const navStyle = { display: 'flex', justifyContent: 'space-between', padding: '15px 5%', background: '#111', color: 'white', alignItems: 'center', position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 2px 10px rgba(0,0,0,0.5)' };
-const logoStyle = { display: 'flex', alignItems: 'center', gap: '10px', fontSize: '24px', fontWeight: 'bold', color: '#e50914', textDecoration: 'none' };
-const menuStyle = { display: 'flex', gap: '30px' };
-const navItemStyle = { color: 'white', textDecoration: 'none', fontSize: '16px', fontWeight: '500' };
-const actionStyle = { display: 'flex', gap: '20px', alignItems: 'center' };
-const adminLinkStyle = { color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none' };
-const loginBtnStyle = { display: 'flex', alignItems: 'center', gap: '5px', color: 'white', textDecoration: 'none', background: '#e50914', padding: '8px 15px', borderRadius: '5px' };
 
 export default Header;

@@ -11,3 +11,12 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Global responsive helpers */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
+button { -webkit-tap-highlight-color: transparent; }
+img { max-width: 100%; height: auto; display: block; }
+
+@media (max-width: 768px) {
+  body { font-size: 15px; }
+}
