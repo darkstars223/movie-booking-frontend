@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { formatDateOnly, parseDateOnly } from '../utils/date';
+import { Link } from 'react-router-dom';
 
 const toLocalDate = (value) => {
   if (!value) return null;
@@ -171,16 +172,19 @@ const MovieCard = ({ movie, onBooking, isUpcoming }) => {
       {isUpcoming && <div style={styles.badge}>PHIM SẮP CHIẾU</div>}
 
       <div style={styles.posterContainer}>
-        <img
-          src={movie.poster_url?.startsWith('http') ? movie.poster_url : `${import.meta.env.VITE_API_BASE_URL}${movie.poster_url}`}
-          alt={movie.title}
-          style={styles.poster}
-         
-        />
+        <Link to={`/movie/${movie.id}`} style={{ textDecoration: 'none' }}>
+          <img
+            src={movie.poster_url?.startsWith('http') ? movie.poster_url : `${import.meta.env.VITE_API_BASE_URL}${movie.poster_url}`}
+            alt={movie.title}
+            style={{ ...styles.poster, cursor: 'pointer' }}
+          />
+        </Link>
       </div>
 
       <div style={styles.movieInfo}>
-        <h3 style={styles.movieTitle}>{movie.title}</h3>
+        <h3 style={styles.movieTitle}>
+          <Link to={`/movie/${movie.id}`} style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}>{movie.title}</Link>
+        </h3>
 
         {movie.genre && <p style={styles.movieGenre}>Thể loại: {movie.genre}</p>}
         {movie.duration && <p style={styles.movieDuration}>Thời lượng: {movie.duration} phút</p>}

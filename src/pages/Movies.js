@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import api from '../api/axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 
 const Movies = () => {
@@ -156,13 +156,15 @@ const MovieRow = ({ movie, showtimes, onSelect }) => {
 
   return (
     <div style={styles.movieCard}>
-      <img
-        src={movie.poster_url?.startsWith('http') ? movie.poster_url : `${import.meta.env.VITE_API_BASE_URL}${movie.poster_url}`}
-        alt={movie.title}
-        style={styles.poster}
-      />
+      <Link to={`/movie/${movie.id}`} style={{ textDecoration: 'none' }}>
+        <img
+          src={movie.poster_url?.startsWith('http') ? movie.poster_url : `${import.meta.env.VITE_API_BASE_URL}${movie.poster_url}`}
+          alt={movie.title}
+          style={{ ...styles.poster, cursor: 'pointer' }}
+        />
+      </Link>
       <div style={styles.movieInfo}>
-        <h3 style={styles.movieTitle}>{movie.title}</h3>
+        <h3 style={styles.movieTitle}><Link to={`/movie/${movie.id}`} style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}>{movie.title}</Link></h3>
         {Object.entries(grouped).map(([theater, sts]) => (
           <div key={theater} style={styles.theaterGroup}>
             <p style={styles.theaterName}>{theater}</p>
