@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import ChatAI from './components/ChatAI';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import Movies from './pages/Movies';
 import MovieDetail from './pages/MovieDetail';
@@ -49,6 +50,7 @@ function App() {
         </Routes>
 
         <ChatAI />
+        <Footer />
       </div>
     </Router>
   );

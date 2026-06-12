@@ -1,0 +1,11 @@
+.site-footer { background:#0b1020; color:#fff; padding:28px 0 12px; margin-top:40px; }
+.footer-inner { display:flex; gap:24px; align-items:flex-start; justify-content:space-between; max-width:1200px; margin:0 auto; padding:0 16px; }
+.footer-col h4 { margin:0 0 8px; color:#ff3b3b }
+.footer-col p, .footer-col li { margin:6px 0; color:#ddd }
+.footer-col ul { list-style:none; padding:0; margin:0 }
+.footer-col a { color:#fff; text-decoration:none; opacity:0.9 }
+.footer-bottom { text-align:center; padding-top:12px; color:#bdbdbd; font-size:13px }
+
+@media (max-width:768px) {
+  .footer-inner { flex-direction:column; gap:12px; align-items:flex-start }
+}
