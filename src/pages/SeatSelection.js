@@ -92,8 +92,6 @@ const SeatSelection = () => {
         const multiplier = s.is_vip ? 1.1 : 1.0; // VIP +10%
         return acc + base * multiplier;
     }, 0);
-    const vipCount = selectedSeats.filter(s => s.is_vip).length;
-    const regularCount = selectedSeats.length - vipCount;
 
     return (
         <div className="seat-selection-container">
