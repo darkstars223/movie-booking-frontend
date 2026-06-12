@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import './AdminDashboard.css';
 import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2, Plus } from 'lucide-react';
@@ -653,25 +654,26 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div style={{ padding: '30px', color: '#111', background: '#f7f9fc', minHeight: '100vh' }}>
+        <div className="admin-dashboard" style={{ padding: '30px', color: '#111', background: '#f7f9fc', minHeight: '100vh' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
-                <button onClick={() => setActiveTab('movies')} style={tabStyle(activeTab === 'movies')}>Quản Lý Phim</button>
-                <button onClick={() => setActiveTab('theaters')} style={tabStyle(activeTab === 'theaters')}>Quản Lý Phòng Chiếu</button>
-                <button onClick={() => setActiveTab('showtimes')} style={tabStyle(activeTab === 'showtimes')}>Quản Lý Suất Chiếu</button>
-                <button onClick={() => setActiveTab('seats')} style={tabStyle(activeTab === 'seats')}>Quản Lý Ghế</button>
-                <button onClick={() => setActiveTab('bookings')} style={tabStyle(activeTab === 'bookings')}>Quản Lý Đặt Vé</button>
-                <button onClick={() => setActiveTab('statistics')} style={tabStyle(activeTab === 'statistics')}>Thống Kê</button>
+                <button className="tab-btn" onClick={() => setActiveTab('movies')} style={tabStyle(activeTab === 'movies')}>Quản Lý Phim</button>
+                <button className="tab-btn" onClick={() => setActiveTab('theaters')} style={tabStyle(activeTab === 'theaters')}>Quản Lý Phòng Chiếu</button>
+                <button className="tab-btn" onClick={() => setActiveTab('showtimes')} style={tabStyle(activeTab === 'showtimes')}>Quản Lý Suất Chiếu</button>
+                <button className="tab-btn" onClick={() => setActiveTab('seats')} style={tabStyle(activeTab === 'seats')}>Quản Lý Ghế</button>
+                <button className="tab-btn" onClick={() => setActiveTab('bookings')} style={tabStyle(activeTab === 'bookings')}>Quản Lý Đặt Vé</button>
+                <button className="tab-btn" onClick={() => setActiveTab('statistics')} style={tabStyle(activeTab === 'statistics')}>Thống Kê</button>
             </div>
 
             {activeTab === 'movies' && (
                 <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                         <h2>Quản Lý Phim</h2>
-                        <button onClick={() => navigate('/admin/add')} style={btnThêm}>
+                        <button onClick={() => navigate('/admin/add')} className="btn-primary" style={btnThêm}>
                             <Plus size={18} /> Thêm Phim Mới
                         </button>
                     </div>
-                    <table style={tableStyle}>
+                    <div className="table-wrap">
+                        <table style={tableStyle}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                                 <th>ID</th>
@@ -695,15 +697,16 @@ const AdminDashboard = () => {
                                 </tr>
                             ))}
                         </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
             )}
 
             {activeTab === 'theaters' && (
                 <div>
                     <h2>Quản Lý Phòng Chiếu</h2>
-                    <form onSubmit={handleSubmitTheater} style={formStyle}>
-                        <div style={formRow}>
+                    <form onSubmit={handleSubmitTheater} className="admin-form" style={formStyle}>
+                        <div className="grid-2" style={formRow}>
                             <input
                                 type="text"
                                 placeholder="Tên phòng"
@@ -723,7 +726,7 @@ const AdminDashboard = () => {
                             />
                         </div>
                         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                            <button type="submit" style={btnThêm}>
+                            <button type="submit" className="btn-primary" style={btnThêm}>
                                 {editingTheater ? 'Lưu phòng chiếu' : 'Thêm phòng chiếu'}
                             </button>
                             {editingTheater && (
@@ -733,7 +736,8 @@ const AdminDashboard = () => {
                             )}
                         </div>
                     </form>
-                    <table style={tableStyle}>
+                    <div className="table-wrap">
+                        <table style={tableStyle}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                                 <th>ID</th>
@@ -755,15 +759,16 @@ const AdminDashboard = () => {
                                 </tr>
                             ))}
                         </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
             )}
 
             {activeTab === 'showtimes' && (
                 <div>
                     <h2>Quản Lý Suất Chiếu</h2>
-                    <form onSubmit={handleSubmitShowtime} style={formStyle}>
-                        <div style={formRow}>
+                    <form onSubmit={handleSubmitShowtime} className="admin-form" style={formStyle}>
+                        <div className="grid-2" style={formRow}>
                             <select
                                 value={showtimeForm.movie_id}
                                 onChange={(e) => {
@@ -794,7 +799,7 @@ const AdminDashboard = () => {
                                 ))}
                             </select>
                         </div>
-                        <div style={formRow}>
+                        <div className="grid-2" style={formRow}>
                             <label style={adminFieldStyle}>
                                 <span style={adminLabelStyle}>Tên phòng chiếu</span>
                                 <input
@@ -818,7 +823,7 @@ const AdminDashboard = () => {
                                 />
                             </label>
                         </div>
-                        <div style={formRow}>
+                        <div className="grid-2" style={formRow}>
                             <label style={adminFieldStyle}>
                                 <span style={adminLabelStyle}>Giờ bắt đầu suất chiếu</span>
                                 <input
@@ -846,7 +851,7 @@ const AdminDashboard = () => {
                                 {selectedShowtimeMovie.duration ? ` Thời lượng ${selectedShowtimeMovie.duration} phút, hệ thống tự tính giờ kết thúc.` : ''}
                             </p>
                         )}
-                        <div style={formRow}>
+                        <div className="grid-2" style={formRow}>
                             <input
                                 type="number"
                                 min="0"
@@ -869,7 +874,8 @@ const AdminDashboard = () => {
                             )}
                         </div>
                     </form>
-                    <table style={tableStyle}>
+                    <div className="table-wrap">
+                        <table style={tableStyle}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                                 <th>ID</th>
@@ -899,15 +905,16 @@ const AdminDashboard = () => {
                                 </tr>
                             ))}
                         </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
             )}
 
             {activeTab === 'seats' && (
                 <div>
                     <h2>Quản Lý Ghế</h2>
-                    <div style={formStyle}>
-                        <div style={formRow}>
+                    <div className="admin-form" style={formStyle}>
+                        <div className="grid-2" style={formRow}>
                             <select
                                 value={seatShowtimeId}
                                 onChange={(e) => handleSelectSeatShowtime(e.target.value)}
@@ -919,7 +926,7 @@ const AdminDashboard = () => {
                                 ))}
                             </select>
                         </div>
-                        <div style={formRow}>
+                        <div className="grid-2" style={formRow}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888' }}>Số lượng ghế muốn thêm:</label>
                                 <div style={{ display: 'flex', gap: '10px' }}>
@@ -932,7 +939,7 @@ const AdminDashboard = () => {
                                         onChange={(e) => setSeatsToAdd(e.target.value)}
                                         style={inputStyle}
                                     />
-                                    <button type="button" onClick={handleGenerateSeats} style={btnThêm}>
+                                    <button type="button" onClick={handleGenerateSeats} className="btn-primary" style={btnThêm}>
                                         Thêm ghế
                                     </button>
                                 </div>
@@ -949,7 +956,7 @@ const AdminDashboard = () => {
                                         onChange={(e) => setSeatsToDelete(e.target.value)}
                                         style={inputStyle}
                                     />
-                                    <button type="button" onClick={handleDeleteSeats} style={{ ...btnThêm, background: '#d32f2f' }}>
+                                    <button type="button" onClick={handleDeleteSeats} className="btn-primary danger" style={{ ...btnThêm, background: '#d32f2f' }}>
                                         Xóa ghế
                                     </button>
                                 </div>
@@ -1010,7 +1017,7 @@ const AdminDashboard = () => {
                                             flex: 1
                                         }}>
                                             {seatsByRow[row].map(seat => (
-                                                <div key={seat.id} style={{
+                                                <div key={seat.id} className="seat-item" style={{
                                                     padding: '8px 6px',
                                                     borderRadius: '4px',
                                                     background: seat.is_booked ? '#bfdbfe' : '#dbeafe',
@@ -1057,7 +1064,8 @@ const AdminDashboard = () => {
                             </button>
                         ))}
                     </div>
-                    <table style={tableStyle}>
+                    <div className="table-wrap">
+                        <table style={tableStyle}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                                 <th>ID</th>
@@ -1097,10 +1105,10 @@ const AdminDashboard = () => {
                                                 <td>{formatLocalDateTime(b.end_time)}</td>
                                                 <td>{bookingStatusLabel(b.status)}</td>
                                                 <td>
-                                                    {b.status === 'pending' && (
+                                                            {b.status === 'pending' && (
                                                         <>
-                                                            <button onClick={() => handleConfirmBooking(b.id)} style={smallConfirmBtn}>Xác nhận</button>
-                                                            <button onClick={() => handleCancelBooking(b.id)} style={smallCancelBtn}>Hủy</button>
+                                                            <button className="small-confirm" onClick={() => handleConfirmBooking(b.id)} style={smallConfirmBtn}>Xác nhận</button>
+                                                            <button className="small-cancel" onClick={() => handleCancelBooking(b.id)} style={smallCancelBtn}>Hủy</button>
                                                         </>
                                                     )}
                                                 </td>
@@ -1137,7 +1145,8 @@ const AdminDashboard = () => {
                                 ))
                             )}
                         </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
             )}
 
@@ -1265,7 +1274,7 @@ const AdminDashboard = () => {
                                 <div style={miniChartSection}>
                                     {renderMiniRevenueChart(topShowtimeCharts, 'movie_title', 'revenue')}
                                 </div>
-                                <div style={{ overflowX: 'auto' }}>
+                                <div className="table-wrap">
                                     <table style={tableStyle}>
                                         <thead>
                                             <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
@@ -1300,7 +1309,7 @@ const AdminDashboard = () => {
                                 <div style={miniChartSection}>
                                     {renderMiniRevenueChart(topTheaterCharts, 'theater_name', 'revenue')}
                                 </div>
-                                <div style={{ overflowX: 'auto' }}>
+                                <div className="table-wrap">
                                     <table style={tableStyle}>
                                         <thead>
                                             <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
@@ -1327,7 +1336,7 @@ const AdminDashboard = () => {
                                 <div style={miniChartSection}>
                                     {renderMiniRevenueChart(topMovieCharts, 'movie_title', 'revenue')}
                                 </div>
-                                <div style={{ overflowX: 'auto' }}>
+                                <div className="table-wrap">
                                     <table style={tableStyle}>
                                         <thead>
                                             <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
