@@ -50,9 +50,27 @@ const SeatSelection = () => {
     const groupSeatsByRow = (allSeats) => {
         const rows = {};
         allSeats.forEach(seat => {
-            const rowLetter = seat.seat_number.charAt(0);
+            const sn = String(seat.seat_number || '');
+            // Try extract leading letters (e.g., A12 -> A)
+            const m = sn.match(/^([A-Za-z]+)/);
+            let rowLetter = '';
+            if (m && m[1]) rowLetter = m[1].toUpperCase();
+            else if (seat.row) rowLetter = String(seat.row);
+            else rowLetter = sn.charAt(0) || '?';
+
             if (!rows[rowLetter]) rows[rowLetter] = [];
             rows[rowLetter].push(seat);
+        });
+
+        // Sort seats within each row by trailing number if present
+        Object.keys(rows).forEach(r => {
+            rows[r].sort((a, b) => {
+                const an = String(a.seat_number || '').match(/(\d+)$/);
+                const bn = String(b.seat_number || '').match(/(\d+)$/);
+                const ai = an ? parseInt(an[1], 10) : 0;
+                const bi = bn ? parseInt(bn[1], 10) : 0;
+                return ai - bi;
+            });
         });
         return rows;
     };
