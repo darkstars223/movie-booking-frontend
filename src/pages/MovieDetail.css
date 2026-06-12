@@ -1,0 +1,73 @@
+.movie-detail-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.movie-detail-trailer {
+  margin-bottom: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.movie-detail-trailer iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 260px;
+  border: 0;
+  display: block;
+}
+
+.movie-detail-info {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.movie-detail-poster {
+  flex: 0 0 260px;
+}
+
+.movie-detail-detail {
+  flex: 1;
+}
+
+.movie-detail-showtimes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (max-width: 950px) {
+  .movie-detail-info {
+    flex-direction: column;
+  }
+
+  .movie-detail-poster,
+  .movie-detail-detail {
+    width: 100%;
+  }
+
+  .movie-detail-poster {
+    flex: unset;
+  }
+}
+
+@media (max-width: 700px) {
+  .movie-detail-container {
+    padding: 20px 4%;
+  }
+
+  .movie-detail-trailer {
+    margin-bottom: 24px;
+  }
+
+  .movie-detail-showtimes {
+    flex-direction: column;
+  }
+
+  .movie-detail-showtimes > div {
+    width: 100%;
+  }
+}

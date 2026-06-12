@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { formatDateOnly } from '../utils/date';
+import './MovieDetail.css';
 
 const convertYoutubeUrl = (url) => {
     if (!url) return '';
@@ -46,14 +47,13 @@ const MovieDetail = () => {
     );
 
     return (
-        <div style={styles.container}>
+        <div className="movie-detail-container" style={styles.container}>
 
             {/* Trailer */}
             {movie.youtube_trailer_url && (
-                <div style={styles.trailerWrapper}>
+                <div className="movie-detail-trailer" style={styles.trailerWrapper}>
                     <iframe
                         width="100%"
-                        height="500"
                         src={convertYoutubeUrl(movie.youtube_trailer_url)}
                         title="Trailer"
                         frameBorder="0"
@@ -65,9 +65,9 @@ const MovieDetail = () => {
             )}
 
             {/* Movie Info */}
-            <div style={styles.infoSection}>
+            <div className="movie-detail-info" style={styles.infoSection}>
                 {/* Poster */}
-                <div style={styles.posterWrapper}>
+                <div className="movie-detail-poster" style={styles.posterWrapper}>
                     <img
                         src={movie.poster_url?.startsWith('http') ? movie.poster_url : `${import.meta.env.VITE_API_BASE_URL}${movie.poster_url}`}
                         alt={movie.title}
@@ -76,7 +76,7 @@ const MovieDetail = () => {
                 </div>
 
                 {/* Detail */}
-                <div style={styles.detail}>
+                <div className="movie-detail-detail" style={styles.detail}>
                     <div style={styles.sectionHeader}>
                         <h1 style={styles.title}>{movie.title}</h1>
                     </div>
@@ -93,7 +93,7 @@ const MovieDetail = () => {
                             <h3 style={styles.showtimeTitle}>Chọn Suất Chiếu</h3>
                         </div>
 
-                        <div style={styles.showtimeGrid}>
+                        <div className="movie-detail-showtimes" style={styles.showtimeGrid}>
                             {showtimes.length > 0 ? (
                                 showtimes.map(st => (
                                     <ShowtimeCard
