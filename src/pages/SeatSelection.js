@@ -142,6 +142,10 @@ const SeatSelection = () => {
                     <div className="legend-dot booked" />
                     <span>Đã đặt</span>
                 </div>
+                <div className="legend-item">
+                    <div className="legend-dot vip" />
+                    <span>VIP (+10%)</span>
+                </div>
             </div>
 
             <div className="seats-layout-wrapper">
