@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Film, User, Search, LayoutDashboard, LogOut, Lock, Menu, X } from 'lucide-react';
+import { Film, User, LayoutDashboard, LogOut, Lock, Menu, X } from 'lucide-react';
 import './Header.css';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -36,7 +36,6 @@ const Header = () => {
       </div>
 
       <div className={`nav-right ${open ? 'open' : ''}`}>
-        <Search size={18} className="icon-btn" />
 
         {user?.role === 'admin' && (
           <Link to="/admin" className="nav-item admin-link">
