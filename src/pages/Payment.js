@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import './Payment.css'; // Bạn có thể tạo file CSS sau để làm đẹp
+import './Payment.css'; 
 
 const Payment = () => {
   const { id } = useParams(); // Lấy ID vé từ URL

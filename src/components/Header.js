@@ -20,9 +20,9 @@ const Header = () => {
   return (
     <nav className="site-nav">
       <div className="nav-left">
-        <Link to="/" className="nav-logo">
+         
           <Film size={28} /> <span className="logo-text">TTV CINEMA</span>
-        </Link>
+        
       </div>
 
       <button className="nav-toggle" aria-label="Mở menu" onClick={() => setOpen(s => !s)}>

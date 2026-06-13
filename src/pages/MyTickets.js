@@ -26,7 +26,7 @@ const MyTickets = () => {
   const user = JSON.parse(localStorage.getItem('user'));
   const userId = user?.id;
 
-  // Cập nhật currentTime mỗi giây
+ 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
