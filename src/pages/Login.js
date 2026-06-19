@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../components/Toast';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const toast = useToast();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -13,10 +15,10 @@ const Login = () => {
             const res = await api.post('/auth/login', { email, password });
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('user', JSON.stringify(res.data.user));
-            alert("Đăng nhập thành công!");
+            toast.success("Đăng nhập thành công!");
             navigate('/');
         } catch (err) {
-            alert(err.response?.data?.message || "Lỗi đăng nhập");
+            toast.error(err.response?.data?.message || "Lỗi đăng nhập");
         }
     };
 

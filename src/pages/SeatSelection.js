@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useToast } from '../components/Toast';
 import './SeatSelection.css';
 
 const SeatSelection = () => {
     const { showtimeId } = useParams();
     const navigate = useNavigate();
+    const toast = useToast();
     const [seats, setSeats] = useState([]);
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [showtimeInfo, setShowtimeInfo] = useState(null);
@@ -77,14 +79,14 @@ const SeatSelection = () => {
 
     const handleBooking = async () => {
         if (isShowtimePast) {
-            alert("Suất chiếu đã qua. Không thể đặt vé nữa.");
+            toast.warning("Suất chiếu đã qua. Không thể đặt vé nữa.");
             return;
         }
 
         try {
             const user = JSON.parse(localStorage.getItem('user'));
             if (!user) {
-                alert("Vui lòng đăng nhập!");
+                toast.info("Vui lòng đăng nhập!");
                 navigate('/login');
                 return;
             }
@@ -96,11 +98,11 @@ const SeatSelection = () => {
             };
             const response = await api.post('/bookings/create', bookingData);
             if (response.status === 201) {
-                alert("Đặt vé thành công!");
+                toast.success("Đặt vé thành công!");
                 navigate('/my-tickets');
             }
         } catch (error) {
-            alert("Ghế đã có người đặt!");
+            toast.error("Ghế đã có người đặt!");
         }
     };
 

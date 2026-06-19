@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { useToast } from '../components/Toast';
 import { toDateInputValue } from '../utils/date';
 
 const MovieForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const toast = useToast();
     const user = JSON.parse(localStorage.getItem('user'));
 
     const [movie, setMovie] = useState({
@@ -47,10 +49,10 @@ const MovieForm = () => {
             } else {
                 await api.post('/admin/movies/add', payload);
             }
-            alert('Thao tác thành công!');
+            toast.success('Thao tác thành công!');
             navigate('/admin');
         } catch (err) {
-            alert('Lỗi: ' + (err.response?.data?.message || 'Không thể xử lý'));
+            toast.error('Lỗi: ' + (err.response?.data?.message || 'Không thể xử lý'));
         }
     };
 

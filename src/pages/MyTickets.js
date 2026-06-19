@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { useToast } from '../components/Toast';
 import './MyTickets.css';
 
 // Cập nhật trạng thái thành 'cancel' và 'expired'
@@ -18,6 +19,7 @@ const MyTickets = () => {
   const [filter, setFilter] = useState('all');
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const toast = useToast();
   
   // State lưu thời gian thực để chạy đếm ngược
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -91,11 +93,11 @@ const MyTickets = () => {
     if (!window.confirm('Bạn có chắc muốn hủy yêu cầu đặt vé này không?')) return;
     try {
       await api.put(`/bookings/cancel/${ticketId}`);
-      alert('Đã hủy yêu cầu đặt vé.');
+      toast.success('Đã hủy yêu cầu đặt vé.');
       fetchUserTickets();
       if (showModal) setShowModal(false);
     } catch (err) {
-      alert('Không thể hủy vé.');
+      toast.error('Không thể hủy vé.');
     }
   };
 

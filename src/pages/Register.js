@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../components/Toast';
 
 const Register = () => {
     const [formData, setFormData] = useState({ fullname: '', email: '', password: '' });
     const navigate = useNavigate();
+    const toast = useToast();
 
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
             await api.post('/auth/register', formData);
-            alert("Đăng ký thành công! Hãy đăng nhập.");
+            toast.success("Đăng ký thành công! Hãy đăng nhập.");
             navigate('/login');
         } catch (err) {
-            alert(err.response?.data?.message || "Lỗi đăng ký");
+            toast.error(err.response?.data?.message || "Lỗi đăng ký");
         }
     };
 

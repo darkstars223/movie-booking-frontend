@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { formatDateOnly, parseDateOnly } from '../utils/date';
 import { Link } from 'react-router-dom';
+import { useToast } from '../components/Toast';
 
 const toLocalDate = (value) => {
   if (!value) return null;
@@ -23,12 +24,9 @@ const Home = () => {
   const [moviesUpcoming, setMoviesUpcoming] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const toast = useToast();
 
-  useEffect(() => {
-    fetchMovies();
-  }, []);
-
-  const fetchMovies = async () => {
+  const fetchMovies = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -76,11 +74,15 @@ const Home = () => {
       setMoviesUpcoming(upcoming.slice(0, 8));
     } catch (err) {
       console.error('Loi fetch phim:', err);
-      alert('Lỗi tải phim, vui lòng F5 để tải lại');
+      toast.error('Lỗi tải phim, vui lòng F5 để tải lại');
     } finally {
       setLoading(false);
     }
-  };
+  } , [toast]);
+
+  useEffect(() => {
+    fetchMovies();
+  }, [fetchMovies]);
 
   const handleBooking = (movieId) => {
     navigate(`/movie/${movieId}`);

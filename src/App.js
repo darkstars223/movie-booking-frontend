@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import ChatAI from './components/ChatAI';
 import Footer from './components/Footer';
+import { ToastProvider } from './components/Toast';
 import Home from './pages/Home';
 import Movies from './pages/Movies';
 import MovieDetail from './pages/MovieDetail';
@@ -17,9 +18,10 @@ import ChangePassword from './pages/ChangePassword';
 
 function App() {
   return (
-    <Router>
-      <div style={{ backgroundColor: '#141414', minHeight: '100vh', color: 'white' }}>
-        <Header />
+    <ToastProvider>
+      <Router>
+        <div style={{ backgroundColor: '#141414', minHeight: '100vh', color: 'white' }}>
+          <Header />
         
         {/* Hệ thống định tuyến các trang */}
         <Routes>
@@ -53,6 +55,7 @@ function App() {
         <Footer />
       </div>
     </Router>
+    </ToastProvider>
   );
 }
 

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import './AdminDashboard.css';
 import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../components/Toast';
 import { Edit, Trash2, Plus } from 'lucide-react';
 import { formatDateOnly } from '../utils/date';
 
@@ -125,6 +126,7 @@ const AdminDashboard = () => {
     const [seatsToDelete, setSeatsToDelete] = useState('');
     const [hoveredDot, setHoveredDot] = useState(null); // { idx, x, y, value, label }
     const navigate = useNavigate();
+    const toast = useToast();
     const user = JSON.parse(localStorage.getItem('user'));
 
     const fetchMovies = () => {
@@ -421,7 +423,7 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         if (user?.role !== 'admin') {
-            alert("Bạn không có quyền truy cập!");
+            toast.error("Bạn không có quyền truy cập!");
             navigate('/');
             return;
         }
@@ -432,16 +434,16 @@ const AdminDashboard = () => {
         if (activeTab === 'statistics') {
             fetchStatistics();
         }
-    }, [user?.role, navigate, activeTab, fetchStatistics]);
+    }, [user?.role, navigate, activeTab, fetchStatistics, toast]);
 
     const handleDeleteMovie = async (id) => {
         if (window.confirm("Bạn có chắc chắn muốn xóa phim này?")) {
             try {
                 await api.delete(`/admin/movies/delete/${id}?userId=${user.id}`);
-                alert('Xóa phim thành công!');
+                toast.success('Xóa phim thành công!');
                 fetchMovies();
             } catch (err) {
-                alert('Lỗi xóa phim: ' + (err.response?.data?.message || err.message));
+                toast.error('Lỗi xóa phim: ' + (err.response?.data?.message || err.message));
             }
         }
     };
@@ -450,10 +452,10 @@ const AdminDashboard = () => {
         if (window.confirm("Bạn có chắc chắn muốn xóa theater này?")) {
             try {
                 await api.delete(`/admin/theaters/delete/${id}?userId=${user.id}`);
-                alert('Xóa theater thành công!');
+                toast.success('Xóa theater thành công!');
                 fetchTheaters();
             } catch (err) {
-                alert('Lỗi xóa theater: ' + (err.response?.data?.message || err.message));
+                toast.error('Lỗi xóa theater: ' + (err.response?.data?.message || err.message));
             }
         }
     };
@@ -462,10 +464,10 @@ const AdminDashboard = () => {
         if (window.confirm("Bạn có chắc chắn muốn xóa showtime này?")) {
             try {
                 await api.delete(`/admin/showtimes/delete/${id}?userId=${user.id}`);
-                alert('Xóa showtime thành công!');
+                toast.success('Xóa showtime thành công!');
                 fetchShowtimes();
             } catch (err) {
-                alert('Lỗi xóa showtime: ' + (err.response?.data?.message || err.message));
+                toast.error('Lỗi xóa showtime: ' + (err.response?.data?.message || err.message));
             }
         }
     };
@@ -483,18 +485,18 @@ const AdminDashboard = () => {
                     ...theaterForm,
                     userId: user.id
                 });
-                alert('Cập nhật phòng chiếu thành công');
+                toast.success('Cập nhật phòng chiếu thành công');
             } else {
                 await api.post('/admin/theaters/add', {
                     ...theaterForm,
                     userId: user.id
                 });
-                alert('Thêm phòng chiếu thành công');
+                toast.success('Thêm phòng chiếu thành công');
             }
             resetTheaterForm();
             fetchTheaters();
         } catch (err) {
-            alert('Lỗi: ' + (err.response?.data?.message || err.message));
+            toast.error('Lỗi: ' + (err.response?.data?.message || err.message));
         }
     };
 
@@ -513,17 +515,17 @@ const AdminDashboard = () => {
         try {
             const selectedMovie = movies.find(movie => String(movie.id) === String(showtimeForm.movie_id));
             if (!selectedMovie?.release_date) {
-                alert('Vui lòng cập nhật ngày khởi chiếu của phim trước khi thêm suất chiếu.');
+                toast.warning('Vui lòng cập nhật ngày khởi chiếu của phim trước khi thêm suất chiếu.');
                 return;
             }
 
             if (!showtimeForm.show_date || !showtimeForm.start_time) {
-                alert('Vui lòng chọn ngày chiếu và giờ bắt đầu suất chiếu.');
+                toast.warning('Vui lòng chọn ngày chiếu và giờ bắt đầu suất chiếu.');
                 return;
             }
 
             if (showtimeForm.show_date < selectedMovie.release_date) {
-                alert('Ngày chiếu không được trước ngày khởi chiếu của phim.');
+                toast.warning('Ngày chiếu không được trước ngày khởi chiếu của phim.');
                 return;
             }
 
@@ -537,15 +539,15 @@ const AdminDashboard = () => {
 
             if (editingShowtime) {
                 await api.put(`/admin/showtimes/edit/${editingShowtime.id}`, payload);
-                alert('Cập nhật suất chiếu thành công');
+                toast.success('Cập nhật suất chiếu thành công');
             } else {
                 await api.post('/admin/showtimes/add', payload);
-                alert('Thêm suất chiếu thành công');
+                toast.success('Thêm suất chiếu thành công');
             }
             resetShowtimeForm();
             fetchShowtimes();
         } catch (err) {
-            alert('Lỗi: ' + (err.response?.data?.message || err.message));
+            toast.error('Lỗi: ' + (err.response?.data?.message || err.message));
         }
     };
 
@@ -574,17 +576,17 @@ const AdminDashboard = () => {
             });
             await fetchSeats(seat.showtime_id);
         } catch (err) {
-            alert('Lỗi cập nhật ghế: ' + (err.response?.data?.message || err.message));
+            toast.error('Lỗi cập nhật ghế: ' + (err.response?.data?.message || err.message));
         }
     };
 
     const handleGenerateSeats = async () => {
         if (!seatShowtimeId) {
-            alert('Vui lòng chọn suất chiếu trước.');
+            toast.warning('Vui lòng chọn suất chiếu trước.');
             return;
         }
         if (!seatsToAdd || parseInt(seatsToAdd) <= 0) {
-            alert('Vui lòng nhập số lượng ghế muốn thêm.');
+            toast.warning('Vui lòng nhập số lượng ghế muốn thêm.');
             return;
         }
         try {
@@ -594,19 +596,19 @@ const AdminDashboard = () => {
             });
             await fetchSeats(seatShowtimeId);
             setSeatsToAdd('');
-            alert('Thêm ghế thành công.');
+            toast.success('Thêm ghế thành công.');
         } catch (err) {
-            alert('Lỗi thêm ghế: ' + (err.response?.data?.message || err.message));
+            toast.error('Lỗi thêm ghế: ' + (err.response?.data?.message || err.message));
         }
     };
 
     const handleDeleteSeats = async () => {
         if (!seatShowtimeId) {
-            alert('Vui lòng chọn suất chiếu trước.');
+            toast.warning('Vui lòng chọn suất chiếu trước.');
             return;
         }
         if (!seatsToDelete || parseInt(seatsToDelete) <= 0) {
-            alert('Vui lòng nhập số lượng ghế muốn xóa.');
+            toast.warning('Vui lòng nhập số lượng ghế muốn xóa.');
             return;
         }
         if (window.confirm(`Bạn có chắc chắn muốn xóa ${seatsToDelete} ghế cho suất chiếu này?`)) {
@@ -614,9 +616,9 @@ const AdminDashboard = () => {
                 await api.delete(`/admin/seats/delete/showtime/${seatShowtimeId}?userId=${user.id}&count=${parseInt(seatsToDelete)}`);
                 await fetchSeats(seatShowtimeId);
                 setSeatsToDelete('');
-                alert('Xóa ghế thành công.');
+                toast.success('Xóa ghế thành công.');
             } catch (err) {
-                alert('Lỗi xóa ghế: ' + (err.response?.data?.message || err.message));
+                toast.error('Lỗi xóa ghế: ' + (err.response?.data?.message || err.message));
             }
         }
     };
@@ -624,10 +626,10 @@ const AdminDashboard = () => {
     const handleConfirmBooking = async (bookingId) => {
         try {
             await api.put(`/admin/bookings/confirm/${bookingId}`, { userId: user.id });
-            alert('Đã xác nhận thanh toán vé.');
+            toast.success('Đã xác nhận thanh toán vé.');
             fetchBookings();
         } catch (err) {
-            alert('Lỗi xác nhận vé: ' + (err.response?.data?.message || err.message));
+            toast.error('Lỗi xác nhận vé: ' + (err.response?.data?.message || err.message));
         }
     };
 
@@ -636,10 +638,10 @@ const AdminDashboard = () => {
 
         try {
             await api.put(`/bookings/cancel/${bookingId}`);
-            alert('Đã hủy vé.');
+            toast.success('Đã hủy vé.');
             fetchBookings();
         } catch (err) {
-            alert('Lỗi hủy vé: ' + (err.response?.data?.message || err.message));
+            toast.error('Lỗi hủy vé: ' + (err.response?.data?.message || err.message));
         }
     };
 
