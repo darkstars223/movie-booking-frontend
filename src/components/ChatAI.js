@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Send, X, Mic, MicOff, Tv } from 'lucide-react';
+import { MessageCircle, Send, X, Mic } from 'lucide-react';
 import api from '../api/axios';
 import { useToast } from './Toast';
 
@@ -7,7 +7,7 @@ const ChatAI = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState([
-        { text: "Xin chào! 👋 Mình là trợ lý ảo của rạp phim TTV. Bạn cần tra cứu phim hay lịch chiếu hôm nay thế nào?", isBot: true }
+        { text: "Chào bạn!  Mình là AI tư vấn phim của TTV. Bạn cần tìm phim hay lịch chiếu thế nào?", isBot: true }
     ]);
     const [loading, setLoading] = useState(false);
     const [isListening, setIsListening] = useState(false);
@@ -45,13 +45,10 @@ const ChatAI = () => {
         }
     };
 
-    // Tự động cuộn xuống mượt mà khi có tin nhắn mới
+    // Tự động cuộn xuống khi có tin nhắn mới
     useEffect(() => {
         if (scrollRef.current) {
-            scrollRef.current.scrollTo({
-                top: scrollRef.current.scrollHeight,
-                behavior: 'smooth'
-            });
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [messages, loading]);
 
@@ -67,73 +64,63 @@ const ChatAI = () => {
             const res = await api.post('/ai/chat', { userMessage: currentInput });
             setMessages([...newMessages, { text: res.data.reply, isBot: true }]);
         } catch (err) {
-            setMessages([...newMessages, { text: "😥 Lỗi kết nối đến máy chủ AI rồi. Bạn thử lại nhé!", isBot: true }]);
+            setMessages([...newMessages, { text: "Lỗi kết nối AI rồi!", isBot: true }]);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div style={{ position: 'fixed', bottom: '30px', right: '30px', zIndex: 2000, fontFamily: 'Segoe UI, Roboto, sans-serif' }}>
-            {/* Nút bấm mở chat (FAB) với hiệu ứng Scale ẩn hiện */}
+        <div style={{ position: 'fixed', bottom: '25px', right: '25px', zIndex: 2000, fontFamily: 'Arial, sans-serif' }}>
+            {/* Nút tròn mở Chat */}
             {!isOpen ? (
-                <button onClick={() => setIsOpen(true)} style={fabStyle} title="Trò chuyện với AI">
-                    <MessageSquare size={26} />
-                    <span style={badgeStyle}>AI</span>
+                <button onClick={() => setIsOpen(true)} style={fabStyle}>
+                    <MessageCircle size={28} />
                 </button>
             ) : (
-                /* Khung Chat Chính */
+                /* Khung Hộp Chat */
                 <div style={chatBoxStyle}>
-                    {/* Header cao cấp */}
+                    {/* Header */}
                     <div style={headerStyle}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={botIconBgStyle}>
-                                <Tv size={16} color="#white" />
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '15px', fontWeight: 'bold', letterSpacing: '0.5px' }}>TTV Movie AI</div>
-                                <div style={{ fontSize: '11px', color: '#4cd137', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span style={onlineDotStyle}></span> Đang trực tuyến
-                                </div>
-                            </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ width: '8px', height: '8px', background: '#4cd137', borderRadius: '50%' }}></div>
+                            <span>TTV Movie AI</span>
                         </div>
-                        <button onClick={() => setIsOpen(false)} style={closeBtnStyle}>
-                            <X size={18} />
-                        </button>
+                        <X size={20} onClick={() => setIsOpen(false)} style={{ cursor: 'pointer', opacity: 0.8 }} />
                     </div>
                     
-                    {/* Khu vực hiển thị tin nhắn */}
+                    {/* Vùng Tin Nhắn */}
                     <div ref={scrollRef} style={messageAreaStyle}>
                         {messages.map((m, i) => (
                             <div key={i} style={{ 
-                                display: 'flex', 
-                                justifyContent: m.isBot ? 'flex-start' : 'flex-end', 
-                                margin: '14px 0',
-                                animation: 'fadeIn 0.3s ease'
+                                display: 'flex',
+                                justifyContent: m.isBot ? 'flex-start' : 'flex-end',
+                                margin: '12px 0',
+                                alignItems: 'flex-start'
                             }}>
-                                {/* Avatar cho Bot */}
-                                {m.isBot && <div style={msgAvatarStyle}>🤖</div>}
+                                {/* Avatar Robot hiển thị bên cạnh tin nhắn AI */}
+                                {m.isBot && <div style={{ marginRight: '8px', fontSize: '18px', marginTop: '4px' }}>🤖</div>}
                                 
-                                <span style={{ 
-                                    background: m.isBot ? '#262626' : 'linear-gradient(135deg, #e50914, #b20710)', 
+                                <div style={{ 
+                                    background: m.isBot ? '#2c2c2c' : '#e50914', 
                                     padding: '10px 14px', 
                                     borderRadius: m.isBot ? '4px 14px 14px 14px' : '14px 14px 4px 14px', 
-                                    fontSize: '13.5px',
-                                    lineHeight: '1.5',
+                                    fontSize: '14px',
+                                    lineHeight: '1.4',
                                     maxWidth: '75%',
-                                    color: '#f5f5f5',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                                    whiteSpace: 'pre-line', // Xuống dòng chuẩn từ dữ liệu Server
+                                    color: 'white',
+                                    whiteSpace: 'pre-line', // Giữ nguyên cấu trúc xuống dòng từ Backend
+                                    wordBreak: 'break-word'
                                 }}>
                                     {m.text}
-                                </span>
+                                </div>
                             </div>
                         ))}
-                        
-                        {/* Hiệu ứng 3 chấm đang gõ (Typing Indicator) khi AI suy nghĩ */}
+
+                        {/* Hoạt ảnh 3 chấm đang gõ (Typing Indicator) chuẩn đẹp */}
                         {loading && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '10px 0' }}>
-                                <div style={msgAvatarStyle}>🤖</div>
+                            <div style={{ display: 'flex', justifyContent: 'flex-start', margin: '12px 0', alignItems: 'center' }}>
+                                <div style={{ marginRight: '8px', fontSize: '18px' }}>🤖</div>
                                 <div style={typingBubbleStyle}>
                                     <div style={typingDotStyle}></div>
                                     <div style={{...typingDotStyle, animationDelay: '0.2s'}}></div>
@@ -143,54 +130,37 @@ const ChatAI = () => {
                         )}
                     </div>
 
-                    {/* Khu vực nhập liệu */}
+                    {/* Thanh Nhập Liệu */}
                     <div style={inputAreaStyle}>
                         <button 
                             onClick={toggleListen} 
-                            style={{...iconBtnStyle, color: isListening ? '#e50914' : '#aaaaaa'}}
-                            title={isListening ? "Đang lắng nghe..." : "Nói để nhập liệu"}
+                            style={{...iconBtnStyle, color: isListening ? '#e50914' : '#bbb'}}
+                            title="Nói để nhập liệu"
                         >
-                            {isListening ? <MicOff size={20} style={{ animation: 'pulse 1s infinite' }} /> : <Mic size={20} />}
+                            <Mic size={20} />
                         </button>
 
                         <input 
                             value={input} 
                             onChange={(e) => setInput(e.target.value)} 
                             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                            placeholder={isListening ? "Đang nghe giọng nói của bạn..." : "Hỏi AI về phim, suất chiếu..."}
+                            placeholder={isListening ? "Đang lắng nghe..." : "Nhập yêu cầu..."}
                             style={inputStyle} 
                             disabled={loading}
                         />
 
-                        <button 
-                            onClick={handleSend} 
-                            style={{
-                                ...sendBtnStyle, 
-                                opacity: (!input.trim() || loading) ? 0.5 : 1,
-                                cursor: (!input.trim() || loading) ? 'not-allowed' : 'pointer'
-                            }} 
-                            disabled={loading || !input.trim()}
-                        >
+                        <button onClick={handleSend} style={sendBtnStyle} disabled={loading || !input.trim()}>
                             <Send size={16} />
                         </button>
                     </div>
                 </div>
             )}
 
-            {/* Chèn mã CSS Keyframes vào giao diện */}
+            {/* CSS Animation cho dấu 3 chấm nhảy múa */}
             <style>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
                 @keyframes bounce {
                     0%, 100% { transform: translateY(0); }
-                    50% { transform: translateY(-6px); }
-                }
-                @keyframes pulse {
-                    0% { transform: scale(1); opacity: 1; }
-                    50% { transform: scale(1.1); opacity: 0.7; }
-                    100% { transform: scale(1); opacity: 1; }
+                    50% { transform: translateY(-5px); }
                 }
             `}</style>
         </div>
@@ -198,110 +168,57 @@ const ChatAI = () => {
 };
 
 // ==========================================
-// HỆ THỐNG STYLE ĐẸP (DARK THEME CHUẨN ĐIỆN ẢNH)
+// HỆ THỐNG CSS OBJECT (SỬA ĐỔI TỪ BAN ĐẦU)
 // ==========================================
 const fabStyle = { 
-    background: 'linear-gradient(135deg, #e50914, #b20710)', 
+    background: '#e50914', 
     border: 'none', 
     borderRadius: '50%', 
-    width: '60px', 
-    height: '60px', 
+    width: '56px',
+    height: '56px',
     cursor: 'pointer', 
     color: 'white', 
-    boxShadow: '0 4px 20px rgba(229, 9, 20, 0.4)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    transition: 'transform 0.2s ease',
-    outline: 'none'
-};
-
-const badgeStyle = {
-    position: 'absolute',
-    top: '-4px',
-    right: '-4px',
-    background: '#ffffff',
-    color: '#e50914',
-    fontSize: '9px',
-    fontWeight: 'bold',
-    padding: '2px 5px',
-    borderRadius: '10px',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.3)'
-};
-
-const chatBoxStyle = { 
-    width: '360px', 
-    height: '520px', 
-    background: '#141414', // Nền tối sâu phong cách Netflix
-    borderRadius: '16px', 
-    display: 'flex', 
-    flexDirection: 'column', 
-    border: '1px solid #282828', 
-    color: 'white', 
-    boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
-    overflow: 'hidden',
-    animation: 'fadeIn 0.25s ease-out'
-};
-
-const headerStyle = { 
-    padding: '16px', 
-    background: '#1f1f1f', 
-    display: 'flex', 
-    justifyContent: 'space-between', 
-    alignItems: 'center',
-    borderBottom: '1px solid #282828' 
-};
-
-const botIconBgStyle = {
-    background: '#e50914',
-    borderRadius: '50%',
-    padding: '6px',
+    boxShadow: '0 4px 15px rgba(229, 9, 20, 0.4)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
 };
 
-const onlineDotStyle = {
-    width: '7px',
-    height: '7px',
-    background: '#4cd137',
-    borderRadius: '50%',
-    display: 'inline-block'
+const chatBoxStyle = { 
+    width: '340px', 
+    height: '480px', 
+    background: '#141414', 
+    borderRadius: '16px', 
+    display: 'flex', 
+    flexDirection: 'column', 
+    border: '1px solid #262626', 
+    color: 'white', 
+    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+    overflow: 'hidden'
 };
 
-const closeBtnStyle = {
-    background: 'none',
-    border: 'none',
-    color: '#888',
-    cursor: 'pointer',
-    padding: '4px',
-    borderRadius: '50%',
-    transition: 'background 0.2s',
-    display: 'flex',
-    alignItems: 'center'
+const headerStyle = { 
+    padding: '14px 16px', 
+    background: '#1f1f1f', 
+    display: 'flex', 
+    justifyContent: 'space-between', 
+    alignItems: 'center',
+    fontWeight: 'bold', 
+    fontSize: '15px',
+    borderBottom: '1px solid #262626' 
 };
 
 const messageAreaStyle = { 
     flex: 1, 
     overflowY: 'auto', 
-    padding: '20px 16px',
-    background: '#141414',
-    scrollBehavior: 'smooth'
-};
-
-const msgAvatarStyle = {
-    marginRight: '8px',
-    fontSize: '18px',
-    display: 'flex',
-    alignItems: 'center'
+    padding: '16px' 
 };
 
 const inputAreaStyle = { 
-    padding: '14px', 
+    padding: '12px', 
     display: 'flex', 
-    gap: '10px', 
-    borderTop: '1px solid #282828', 
+    gap: '8px', 
+    borderTop: '1px solid #262626', 
     alignItems: 'center',
     background: '#1f1f1f'
 };
@@ -310,26 +227,24 @@ const inputStyle = {
     flex: 1, 
     background: '#2b2b2b', 
     color: 'white', 
-    border: '1px solid #3a3a3a', 
-    padding: '10px 14px', 
-    borderRadius: '20px', // Bo tròn góc hiện đại
+    border: '1px solid #3b3b3b', 
+    padding: '8px 12px', 
+    borderRadius: '20px', 
     outline: 'none',
-    fontSize: '13.5px',
-    transition: 'border-color 0.2s'
+    fontSize: '14px'
 };
 
 const sendBtnStyle = { 
-    background: 'linear-gradient(135deg, #e50914, #b20710)', 
+    background: '#e50914', 
     border: 'none', 
     color: 'white', 
     borderRadius: '50%', 
-    width: '36px',
-    height: '36px',
+    width: '34px',
+    height: '34px',
+    cursor: 'pointer', 
     display: 'flex', 
     alignItems: 'center', 
-    justifyContent: 'center',
-    boxShadow: '0 2px 8px rgba(229, 9, 20, 0.3)',
-    transition: 'transform 0.1s ease'
+    justifyContent: 'center' 
 };
 
 const iconBtnStyle = { 
@@ -338,13 +253,12 @@ const iconBtnStyle = {
     cursor: 'pointer', 
     display: 'flex', 
     alignItems: 'center', 
-    padding: '4px',
-    transition: 'color 0.2s' 
+    padding: '4px'
 };
 
-// Style cho khối 3 chấm nhấp nháy khi gõ tin nhắn
+// Khối bọc hiệu ứng 3 chấm gõ
 const typingBubbleStyle = {
-    background: '#262626',
+    background: '#2c2c2c',
     padding: '12px 16px',
     borderRadius: '4px 14px 14px 14px',
     display: 'flex',
@@ -355,9 +269,9 @@ const typingBubbleStyle = {
 const typingDotStyle = {
     width: '6px',
     height: '6px',
-    background: '#888',
+    background: '#aaa',
     borderRadius: '50%',
-    animation: 'bounce 1.4s infinite ease-in-out both'
+    animation: 'bounce 1.4s infinite ease-in-out'
 };
 
 export default ChatAI;
