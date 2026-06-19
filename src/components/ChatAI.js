@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Send, X, Mic, MicOff } from 'lucide-react';
 import api from '../api/axios';
+import { useToast } from './Toast';
 
 const ChatAI = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -9,6 +10,7 @@ const ChatAI = () => {
     const [loading, setLoading] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const scrollRef = useRef(null);
+    const toast = useToast();
 
     // --- Logic Nhận diện giọng nói (Micro) ---
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -30,7 +32,7 @@ const ChatAI = () => {
 
     const toggleListen = () => {
         if (!recognition) {
-            alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói.");
+            toast.warning("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói.");
             return;
         }
         if (isListening) {
