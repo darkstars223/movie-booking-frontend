@@ -3,6 +3,7 @@ import './AdminDashboard.css';
 import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/ConfirmProvider';
 import { Edit, Trash2, Plus } from 'lucide-react';
 import { formatDateOnly } from '../utils/date';
 
@@ -127,6 +128,7 @@ const AdminDashboard = () => {
     const [hoveredDot, setHoveredDot] = useState(null); // { idx, x, y, value, label }
     const navigate = useNavigate();
     const toast = useToast();
+    const confirm = useConfirm();
     const user = JSON.parse(localStorage.getItem('user'));
 
     const fetchMovies = () => {
@@ -437,38 +439,38 @@ const AdminDashboard = () => {
     }, [user?.role, navigate, activeTab, fetchStatistics, toast]);
 
     const handleDeleteMovie = async (id) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa phim này?")) {
-            try {
-                await api.delete(`/admin/movies/delete/${id}?userId=${user.id}`);
-                toast.success('Xóa phim thành công!');
-                fetchMovies();
-            } catch (err) {
-                toast.error('Lỗi xóa phim: ' + (err.response?.data?.message || err.message));
-            }
+        const ok = await confirm('Bạn có chắc chắn muốn xóa phim này?');
+        if (!ok) return;
+        try {
+            await api.delete(`/admin/movies/delete/${id}?userId=${user.id}`);
+            toast.success('Xóa phim thành công!');
+            fetchMovies();
+        } catch (err) {
+            toast.error('Lỗi xóa phim: ' + (err.response?.data?.message || err.message));
         }
     };
 
     const handleDeleteTheater = async (id) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa theater này?")) {
-            try {
-                await api.delete(`/admin/theaters/delete/${id}?userId=${user.id}`);
-                toast.success('Xóa theater thành công!');
-                fetchTheaters();
-            } catch (err) {
-                toast.error('Lỗi xóa theater: ' + (err.response?.data?.message || err.message));
-            }
+        const ok = await confirm('Bạn có chắc chắn muốn xóa theater này?');
+        if (!ok) return;
+        try {
+            await api.delete(`/admin/theaters/delete/${id}?userId=${user.id}`);
+            toast.success('Xóa theater thành công!');
+            fetchTheaters();
+        } catch (err) {
+            toast.error('Lỗi xóa theater: ' + (err.response?.data?.message || err.message));
         }
     };
 
     const handleDeleteShowtime = async (id) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa showtime này?")) {
-            try {
-                await api.delete(`/admin/showtimes/delete/${id}?userId=${user.id}`);
-                toast.success('Xóa showtime thành công!');
-                fetchShowtimes();
-            } catch (err) {
-                toast.error('Lỗi xóa showtime: ' + (err.response?.data?.message || err.message));
-            }
+        const ok = await confirm('Bạn có chắc chắn muốn xóa showtime này?');
+        if (!ok) return;
+        try {
+            await api.delete(`/admin/showtimes/delete/${id}?userId=${user.id}`);
+            toast.success('Xóa showtime thành công!');
+            fetchShowtimes();
+        } catch (err) {
+            toast.error('Lỗi xóa showtime: ' + (err.response?.data?.message || err.message));
         }
     };
 
@@ -611,15 +613,15 @@ const AdminDashboard = () => {
             toast.warning('Vui lòng nhập số lượng ghế muốn xóa.');
             return;
         }
-        if (window.confirm(`Bạn có chắc chắn muốn xóa ${seatsToDelete} ghế cho suất chiếu này?`)) {
-            try {
-                await api.delete(`/admin/seats/delete/showtime/${seatShowtimeId}?userId=${user.id}&count=${parseInt(seatsToDelete)}`);
-                await fetchSeats(seatShowtimeId);
-                setSeatsToDelete('');
-                toast.success('Xóa ghế thành công.');
-            } catch (err) {
-                toast.error('Lỗi xóa ghế: ' + (err.response?.data?.message || err.message));
-            }
+        const ok = await confirm(`Bạn có chắc chắn muốn xóa ${seatsToDelete} ghế cho suất chiếu này?`);
+        if (!ok) return;
+        try {
+            await api.delete(`/admin/seats/delete/showtime/${seatShowtimeId}?userId=${user.id}&count=${parseInt(seatsToDelete)}`);
+            await fetchSeats(seatShowtimeId);
+            setSeatsToDelete('');
+            toast.success('Xóa ghế thành công.');
+        } catch (err) {
+            toast.error('Lỗi xóa ghế: ' + (err.response?.data?.message || err.message));
         }
     };
 
@@ -634,7 +636,8 @@ const AdminDashboard = () => {
     };
 
     const handleCancelBooking = async (bookingId) => {
-        if (!window.confirm('Bạn có chắc muốn hủy vé này?')) return;
+        const ok = await confirm('Bạn có chắc muốn hủy vé này?');
+        if (!ok) return;
 
         try {
             await api.put(`/bookings/cancel/${bookingId}`);

@@ -4,6 +4,7 @@ import Header from './components/Header';
 import ChatAI from './components/ChatAI';
 import Footer from './components/Footer';
 import { ToastProvider } from './components/Toast';
+import { ConfirmProvider } from './components/ConfirmProvider';
 import Home from './pages/Home';
 import Movies from './pages/Movies';
 import MovieDetail from './pages/MovieDetail';
@@ -19,6 +20,7 @@ import ChangePassword from './pages/ChangePassword';
 function App() {
   return (
     <ToastProvider>
+      <ConfirmProvider>
       <Router>
         <div style={{ backgroundColor: '#141414', minHeight: '100vh', color: 'white' }}>
           <Header />
@@ -54,7 +56,8 @@ function App() {
         <ChatAI />
         <Footer />
       </div>
-    </Router>
+      </Router>
+      </ConfirmProvider>
     </ToastProvider>
   );
 }

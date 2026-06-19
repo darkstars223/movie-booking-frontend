@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/ConfirmProvider';
 import './MyTickets.css';
 
 // Cập nhật trạng thái thành 'cancel' và 'expired'
@@ -27,6 +28,7 @@ const MyTickets = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
   const userId = user?.id;
+  const confirm = useConfirm();
 
  
   useEffect(() => {
@@ -90,7 +92,8 @@ const MyTickets = () => {
   };
 
   const handleCancelTicket = async (ticketId) => {
-    if (!window.confirm('Bạn có chắc muốn hủy yêu cầu đặt vé này không?')) return;
+    const ok = await confirm('Bạn có chắc muốn hủy yêu cầu đặt vé này không?');
+    if (!ok) return;
     try {
       await api.put(`/bookings/cancel/${ticketId}`);
       toast.success('Đã hủy yêu cầu đặt vé.');
